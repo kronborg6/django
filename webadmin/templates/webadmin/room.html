@@ -1,0 +1,94 @@
+{% extends "webadmin/layout.html" %} {% block body%} {% load static %}
+
+
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+<script src="{% static 'pagination.js' %}"></script>
+
+<div class="container">
+
+<div class="row">
+    <div class="col-12">
+    
+    <div class="d-flex" style="align-items: center; flex-direction: column;">
+      <h2>{{room.id}} {{room.name}}</h2>      
+      <div>Created at {{room.timestamp}}</div>    
+      <div>Tilmeldte hold: {{teamRoomsPage.paginator.count}}</div>  
+          
+    </div>   
+        
+    <div class="table shadow mt-5">
+      <h2>Tilmeldte hold</h2>    
+          <table style="width:100%">
+        <tr>
+          <th>ID</th>
+          <th>Navn</th>  
+        </tr>
+        {% for item in teamRoomsPage.object_list  %}           
+        <tr> 
+          <td>{{item.id}}</td>
+          <td>{{item.name}}</td>    
+          <td><a href="/team/{{item.id}}">Hold</a></td>
+        </tr> 
+        {% endfor %}  
+        
+
+      </table>       
+      {% if teamRoomsPage.has_previous %}
+      <a id="room-team-previous" data-page="{{teamRoomsPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+      {% endif %}
+      {% if teamRoomsPage.has_next %}
+      <a id="room-team-next" data-page="{{teamRoomsPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+      {% endif %} 
+      
+    </div>      
+  </div>
+</div>
+
+
+  <div class="col-12">
+
+<form method="post" style="justify-content: space-evenly; align-items: center;" class="d-flex flex-row mt-5 mb-3">
+  {% csrf_token %}
+  <label for="exampleFormControlInput1" class="form-label">Tidspunkt fra</label>
+  <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="start">    
+    <label for="exampleFormControlInput1" class="form-label">Til</label>
+    <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="end">
+    <div>
+      <input type="submit" class="btn btn-primary" value="Søg">
+    </div>
+</form>   
+
+
+<div class="table shadow mt-5">
+  <h2>Historik</h2>
+
+      <table style="width:100%">
+    <tr>
+      <th>Dør</th>
+      <th>Tidspunkt</th>  
+    </tr>
+    {% for item in historyPage.object_list  %}           
+    <tr> 
+      <td>{{item.embedded}}</td>
+      <td>{{item.timestamp}}</td>    
+      <td><a href="/user/{{item.id}}">Lokale</a></td>
+    </tr> 
+    {% endfor %}  
+    
+          
+  </table>       
+  {% if historyPage.has_previous %}
+  <a id="history-previous" data-page="{{historyPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+  {% endif %}
+  {% if historyPage.has_next %}
+  <a id="history-next" data-page="{{historyPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+  {% endif %} 
+  
+</div> 
+  </div>
+</div>
+
+</div>
+
+
+{% endblock %}

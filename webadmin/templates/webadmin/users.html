@@ -1,0 +1,137 @@
+{% extends "webadmin/layout.html" %} {% block body%} {% load static %}
+
+<link rel="stylesheet" href="{% static 'multiselect.css' %}" />
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+<script src="{% static 'multiselect.js' %}"></script>
+<script src="{% static 'pagination.js' %}"></script>
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-xl-6 col-12">
+      <form class="form shadow" action="users" method="POST">
+        <div class="create">
+          <h2>Opret bruger</h2>
+          {% csrf_token %}
+
+          <input required name="name" class="form__select" placeholder="Navn" />
+          <input required name="email" class="form__select" placeholder="Email" />
+          <input required name="password" class="form__select" placeholder="Password" />               
+               
+          <div id="myMultiselect" class="multiselect mb-3">
+            <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
+              <select required name="teams" class="form-select">
+                <option></option>
+              </select>
+              <div class="overSelect"></div>
+            </div>
+            <div id="mySelectOptions">
+              <label for="1"><input type="checkbox" id="1" onchange="checkboxStatusChange()" value="Team 1" /> Team 1</label>   
+              <label for="2"><input type="checkbox" id="2" onchange="checkboxStatusChange()" value="Team 2" /> Team 2</label>   
+              <label for="3"><input type="checkbox" id="3" onchange="checkboxStatusChange()" value="Team 3" /> Team 3</label>   
+              <label for="4"><input type="checkbox" id="4" onchange="checkboxStatusChange()" value="Team 4" /> Team 4</label>   
+              <label for="5"><input type="checkbox" id="5" onchange="checkboxStatusChange()" value="Team 5" /> Team 5</label>   
+              <label for="6"><input type="checkbox" id="6" onchange="checkboxStatusChange()" value="Team 6" /> Team 6</label>     
+            </div>
+          </div>
+        
+          <input class="btn btn-primary form_button" type="submit" value="Save" />
+        </div>
+       
+      </form>
+    </div>
+  <!-- Bruger oversigt-->
+  <!-- Historik -->
+
+
+    <div class="col-xl-6 col-12 mt-3 mt-xl-0">   
+
+      <div class="table shadow h-100 d-flex flex-column">
+        <h2>Brugere</h2>
+
+            <table style="width:100%">
+          <tr>
+            <th>ID</th>
+            <th>Navn</th>
+            <th>Email</th>
+            <th>Created At</th>
+          </tr>
+          {% for item in userPage.object_list  %}           
+          <tr> 
+            <td>{{item.id}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.email}}</td>
+            <td>{{item.CreatedAt}}</td>    
+            <td><a href="/user/{{item.id}}">Profil</a></td>
+          </tr> 
+          {% endfor %}  
+          
+                
+        </table>   
+        
+        <div class="h-100 d-flex flex-column justify-content-end">
+          <div>
+            {% if userPage.has_previous %}
+            <a id="users-previous" data-page="{{userPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+            {% endif %}
+            {% if userPage.has_next %}
+            <a id="users-next" data-page="{{userPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+            {% endif %} 
+          </div>
+          </div>   
+      </div>
+    </div>
+
+  </div>
+ 
+  <div class="row mb-5">
+    <div class="col">
+
+  <form method="post" style="justify-content: space-evenly; align-items: center;" class="d-flex flex-row mt-5 mb-4">
+    {% csrf_token %}
+    <label for="exampleFormControlInput1" class="form-label">Tidspunkt fra</label>
+    <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="start">    
+      <label for="exampleFormControlInput1" class="form-label">Til</label>
+      <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="end">
+      <div>
+        <input type="submit" class="btn btn-primary" value="Søg">
+      </div>
+  </form>     
+
+      <div class="table shadow">
+        <h2>Historik</h2>
+
+
+        <table style="width:100%">
+          <tr>
+            <th>Person</th>
+            <th>Dør</th>
+            <th>Tidspunkt</th>            
+          </tr>
+          {% for item in historyPage.object_list %}     
+          <tr> 
+            <td>{{item.user}}</td>
+            <td>{{item.embedded}}</td>
+            <td>{{item.timestamp}}</td>           
+          </tr> 
+          {% endfor %}            
+        </table>      
+        <div class="h-100 d-flex flex-column justify-content-end">   
+          <div>
+            {% if historyPage.has_previous %}
+            <a id="history-previous" data-page="{{historyPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+            {% endif %}
+            {% if historyPage.has_next %}
+            <a id="history-next" data-page="{{historyPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+            {% endif %}
+          </div>          
+      </div> 
+      </div>
+    </div>
+  </div>
+
+ 
+</div>
+
+
+{% endblock %}

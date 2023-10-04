@@ -1,0 +1,228 @@
+{% extends "webadmin/layout.html" %} {% block body%} {% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+<div class="container">
+
+
+    <div class="row">
+
+
+        <div class="d-flex justify-content-center w-100 mb-3">
+            <h1 style="font-weight: 400">Oversigt</h1>
+        </div>
+        
+
+<div class="col-12 d-flex">
+
+
+
+
+
+<div class="col-4">
+    <div class="info shadow info-users mt-0">
+        <div class="d-flex justify-content-center">
+            Brugere
+        </div>
+        <div>
+            I alt
+        </div>
+        <div class="info__number">
+            222
+        </div>
+        <div>
+            Denne uge
+        </div>
+        <div class="info__number">
+            12
+        </div>
+    </div>
+
+    <div class="info shadow info-rooms">
+        <div class="d-flex justify-content-center">
+            Lokaler
+        </div>
+        <div>
+            I alt
+        </div>
+        <div class="info__number">
+            222
+        </div>
+        <div>
+            Denne uge
+        </div>
+        <div class="info__number">
+            12
+        </div>
+    </div>
+
+
+    <div class="info shadow info-events">
+        <div class="d-flex justify-content-center">
+            Hændelser
+        </div>
+        <div>
+            I alt
+        </div>
+        <div class="info__number">
+            222
+        </div>
+        <div>
+            Denne uge
+        </div>
+        <div class="info__number">
+            12
+        </div>
+    </div>
+
+    <div class="info shadow info-teams">
+        <div class="d-flex justify-content-center">
+            Teams
+        </div>
+        <div>
+            I alt
+        </div>
+        <div class="info__number">
+            222
+        </div>
+        <div>
+            Denne uge
+        </div>
+        <div class="info__number">
+            12
+        </div>
+    </div></div>  
+    
+   
+  
+    <div class="col-8 d-flex">
+        <canvas id="myChart" class="shadow" style="width:100%;"></canvas>
+    </div>
+</div>   
+
+     
+
+    </div>
+
+
+
+    <!--
+  {{usersTotal}}
+            {{roomsTotal}}
+          
+    -->      
+
+</div>
+
+<script>
+
+var xValues = [];
+var yValues = [];
+
+</script>
+
+
+{% for item in users.usersX %}
+<script>
+xValues.push("{{item}}");
+</script>
+{% endfor %}
+
+
+{% for x in users.usersY %}
+<script>
+
+yValues.push("{{x}}")
+</script>
+{% endfor %}
+
+<script>
+
+    var barColors = "#FFB547";
+    var chart = new Chart("myChart", {
+      type: "bar",
+      data: {
+        labels: xValues,
+        datasets: [{
+          backgroundColor: barColors,
+          data: yValues
+        }]
+      },
+      options: {
+        responsive: true,
+    maintainAspectRatio: false,
+        
+        scales: {
+                yAxes: [{
+                    gridLines: {
+                display:false
+            },            
+                    ticks: {
+                        min: 0,
+                    }
+                }],
+                xAxes: [{
+            gridLines: {
+                display:false
+            }
+        }],
+                
+            },
+        legend: {display: false},
+        title: {
+          display: true,          
+        }
+      }
+    });
+
+
+// var x = [1,2,3,2];
+    // var y = [1,1,1,10];
+
+// chart.data.datasets[0].data = y;
+// chart.data.labels = x;
+
+
+var usersYvalues = yValues;
+var roomsYValues = [1,2,3,4,5,6,7]
+var eventsYValues = [6,4,20,50,25,8,]
+var teamsYValues = [1,2,3,4,5,6,7]
+
+var usersButton = document.getElementsByClassName("info-users")[0];
+var roomsButton = document.getElementsByClassName("info-rooms")[0];
+var eventsButton = document.getElementsByClassName("info-events")[0];
+var teamsButton = document.getElementsByClassName("info-teams")[0];
+
+
+
+usersButton.addEventListener("click", function(){
+    updateY(yValues,"#FFB547")
+})
+
+roomsButton.addEventListener("click", function(){
+    updateY(roomsYValues,"#66B6FF")
+})
+eventsButton.addEventListener("click", function(){
+    updateY(eventsYValues,"#6DFF8D")
+})
+teamsButton.addEventListener("click", function(){
+    updateY(teamsYValues,"#FF7373")
+})
+
+
+function updateY (yValues, color)
+{   
+    chart.data.datasets[0].data = yValues;
+    chart.data.datasets[0].backgroundColor = color;
+    chart.update();
+}
+
+
+</script>
+
+
+
+
+
+{% endblock  %}

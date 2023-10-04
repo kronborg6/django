@@ -1,0 +1,58 @@
+{% extends "webadmin/layout.html" %} {% block body%} {% load static %}
+
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+
+<script src="{% static 'pagination.js' %}"></script>
+
+
+<div class="container">       
+    <div class="d-flex" style="align-items: center; flex-direction: column;">
+      <h2>ID {{team.id}} {{team.name}}</h2>
+      <div>Tilmeldte: {{teamUsersPage.paginator.count}}</div>            
+    </div>  
+
+  <!-- Bruger oversigt-->
+  <!-- Historik -->
+
+  <div class="row mt-5">
+    <div class="col">   
+
+      <div class="table shadow">
+        <h2>Brugere</h2>
+
+            <table style="width:100%">
+          <tr>
+            <th>ID</th>
+            <th>Navn</th>
+            <th>Email</th>
+            <th>Created At</th>
+          </tr>
+          {% for item in teamUsersPage.object_list  %}           
+          <tr> 
+            <td>{{item.id}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.email}}</td>
+            <td>{{item.CreatedAt}}</td>    
+            <td><a href="/user/{{item.id}}">Profil</a></td>
+          </tr> 
+          {% endfor %}  
+          
+                
+        </table>       
+        {% if teamUsersPage.has_previous %}
+        <a id="team-user-previous" data-page="{{teamUsersPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+        {% endif %}
+        {% if teamUsersPage.has_next %}
+        <a id="team-user-next" data-page="{{teamUsersPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+        {% endif %} 
+        
+      </div>
+    </div>
+  </div>
+
+
+
+</div>
+
+
+{% endblock %}
