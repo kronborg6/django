@@ -27,6 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     'seaofkeys.com',
+    'www.seaofkeys.com',
     'localhost'
     ]
 
