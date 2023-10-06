@@ -8,8 +8,6 @@
 
 <div class="container">
   <div class="row" style="min-height: 500px;">
-
-
     <div class="col-6">
       <form class="form shadow" action="users" method="POST">
         <div class="create">
@@ -64,10 +62,10 @@
         <div class="h-100 d-flex flex-column justify-content-end">
         <div>
           {% if roomsPage.has_previous %}
-          <a id="rooms-previous" data-page="{{roomsPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+          <a id="rooms-previous" data-page="{{roomsPage.previous_page_number}}" data-param="roomsPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
           {% endif %}
           {% if roomsPage.has_next %}
-          <a id="rooms-next" data-page="{{roomsPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+          <a id="rooms-next" data-page="{{roomsPage.next_page_number}}" data-param="roomsPage" class="btn next-previous btn-primary pagination-button">Next</a>
           {% endif %} 
         </div>     
         

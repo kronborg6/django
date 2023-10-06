@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="{% static 'style.css' %}" />
 
 <script src="{% static 'pagination.js' %}"></script>
+<script src="{% static 'search.js' %}"></script>
 
 
 <div class="container">       
@@ -11,11 +12,16 @@
       <div>Tilmeldte: {{teamUsersPage.paginator.count}}</div>            
     </div>  
 
+
+
+    
+
   <!-- Bruger oversigt-->
   <!-- Historik -->
 
-  <div class="row mt-5">
-    <div class="col">   
+  <div class="row mt-3">
+  
+    <div class="col-12"> 
 
       <div class="table shadow">
         <h2>Brugere</h2>
@@ -40,14 +46,39 @@
                 
         </table>       
         {% if teamUsersPage.has_previous %}
-        <a id="team-user-previous" data-page="{{teamUsersPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+        <a id="team-user-previous" data-page="{{teamUsersPage.previous_page_number}}" data-param="teamUsersPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
         {% endif %}
         {% if teamUsersPage.has_next %}
-        <a id="team-user-next" data-page="{{teamUsersPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+        <a id="team-user-next" data-page="{{teamUsersPage.next_page_number}}" data-param="teamUsersPage" class="btn next-previous btn-primary pagination-button">Next</a>
         {% endif %} 
         
       </div>
     </div>
+
+    <div class="col-12">
+      <form class="form shadow p-4" action="/team/{{team.id}}" method="POST">
+        <div class="d-flex flex-column" style="align-items: center;">
+          <h2>Tilmeld bruger</h2>
+          {% csrf_token %}          
+
+          <input type="text" id="myInput" placeholder="Search for names.." title="Type in a name">
+          
+<ul id="myUL" class="p-0">
+
+  {% for item in users %}
+
+  <li style="display: none;"><a data-id="" >{{item.id}} {{item.name}}</a></li> 
+
+  {% endfor %}
+
+
+</ul>
+
+          <input class="btn btn-primary form_button" type="submit" value="Save" />       
+        </div>        
+      </form>
+    </div>
+
   </div>
 
 

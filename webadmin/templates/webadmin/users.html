@@ -72,10 +72,10 @@
         <div class="h-100 d-flex flex-column justify-content-end">
           <div>
             {% if userPage.has_previous %}
-            <a id="users-previous" data-page="{{userPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+            <a id="users-previous" data-page="{{userPage.previous_page_number}}" data-param="userPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
             {% endif %}
             {% if userPage.has_next %}
-            <a id="users-next" data-page="{{userPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+            <a id="users-next" data-page="{{userPage.next_page_number}}" data-param="userPage" class="btn next-previous btn-primary pagination-button">Next</a>
             {% endif %} 
           </div>
           </div>   
@@ -119,10 +119,10 @@
         <div class="h-100 d-flex flex-column justify-content-end">   
           <div>
             {% if historyPage.has_previous %}
-            <a id="history-previous" data-page="{{historyPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+            <a id="history-previous" data-page="{{historyPage.previous_page_number}}" data-param="historyPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
             {% endif %}
             {% if historyPage.has_next %}
-            <a id="history-next" data-page="{{historyPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+            <a id="history-next" data-page="{{historyPage.next_page_number}}" data-param="historyPage" class="btn next-previous btn-primary pagination-button">Next</a>
             {% endif %}
           </div>          
       </div> 

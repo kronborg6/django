@@ -64,10 +64,10 @@
        <div class="h-100 d-flex flex-column justify-content-end">
             <div>
               {% if teamsPage.has_previous %}
-              <a id="teams-previous" data-page="{{teamsPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+              <a id="teams-previous" data-page="{{teamsPage.previous_page_number}}" data-param="teamsPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
               {% endif %}
               {% if teamsPage.has_next %}
-              <a id="teams-next" data-page="{{teamsPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+              <a id="teams-next" data-page="{{teamsPage.next_page_number}}" data-param="teamsPage" class="btn next-previous btn-primary pagination-button">Next</a>
               {% endif %} 
             </div>         
         </div>

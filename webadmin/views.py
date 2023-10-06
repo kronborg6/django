@@ -8,6 +8,8 @@ from django import forms
 from datetime import datetime, timedelta
 import json
 import hashlib
+import requests
+
 
 class Timeperiod(forms.Form):
     start = forms.DateField(label="Start", required=True)
@@ -56,7 +58,13 @@ def NewPaginator(request,list, itemsPerPage, param):
 
 time = datetime.now().strftime('%H:%M')  
 
+
+
+
 def index (request):
+    
+    if request.session.get("token") == None:            
+            return redirect("/login")    
 
     usersTotal = 10
     roomsTotal = 33
@@ -75,11 +83,15 @@ def index (request):
     return render(request, "webadmin/index.html",{    
         "usersTotal" : usersTotal,
         "roomsTotal" : roomsTotal,
-        "users" : users,      
+        "users" : users,     
+        
           
     })
 
 def users (request):     
+
+    if request.session.get("token") == None:            
+            return redirect("/login")   
 
     userHistory = []
     usersList = []
@@ -127,6 +139,9 @@ def users (request):
 
 def user(request,id):
 
+    if request.session.get("token") == None:            
+            return redirect("/login")   
+
     time = datetime.now().strftime("%H:%M %D")
     currentUser = User(id,"Morten","bindzus@mail.dk",time) 
     teams = []
@@ -154,6 +169,9 @@ def user(request,id):
 
 def rooms (request):
 
+    if request.session.get("token") == None:            
+            return redirect("/login")   
+
 
     rooms = []
 
@@ -172,6 +190,9 @@ def rooms (request):
     })
 
 def room(request,id):
+
+    if request.session.get("token") == None:            
+            return redirect("/login")   
 
 
     teams = []
@@ -197,6 +218,9 @@ def room(request,id):
 
 def teams(request):
 
+    if request.session.get("token") == None:            
+            return redirect("/login")   
+
 
 
     teams = []
@@ -214,6 +238,9 @@ def teams(request):
 
 def team(request,id):
 
+    if request.session.get("token") == None:            
+            return redirect("/login")   
+
     users = []
     team = Team(1,"Køkkendamerne")
 
@@ -228,12 +255,13 @@ def team(request,id):
 
         "teamUsersPage" : teamUsersPage,
         "team" : team,
+        "users" : users,
        
 
     })
 
 
-def login(request):
+def login(request):    
 
     email = ""
     password = ""
@@ -243,19 +271,31 @@ def login(request):
         email = request.POST["email_test"]
         password = request.POST["password"]
 
-        # myobj = {'email': email, "password": password}
-        # x = requests.post(url + "auth/adminlogin", json=myobj)
-        # json_response = x.json()
 
-        # token = json_response["token"]
+        email = "mkronborg7@gmail.com"
+        password = "Test"
 
-        # session = requests.session()
-        # request.session['token'] = token
+        url = "https://api.seaofkeys.com/auth/login"
 
-        # return HttpResponseRedirect(reverse("index"))
+        myobj = {'email': email, "password": password}
+        x = requests.post(url, json=myobj)
+        json_response = x.json()     
+
+        token = json_response["token"]
+
+        session = requests.session()
+        request.session['token'] = token
+
+        return HttpResponseRedirect(reverse("index"))
 
     return render(request, "webadmin/login.html",{
         "email" : email,
         "password" : password
         
     })
+
+def logout(request):
+
+    request.session['token'] = None
+    
+    return HttpResponseRedirect(reverse("login"))

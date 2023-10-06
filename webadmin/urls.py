@@ -13,5 +13,6 @@ urlpatterns = [
     path("teams",views.teams, name="teams"),
     path("team/<int:id>", views.team, name="team"),
     path("login", views.login, name="login"),
+    path("logout", views.logout, name="logout")
     
 ]

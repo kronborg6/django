@@ -34,10 +34,10 @@
 
       </table>       
       {% if teamRoomsPage.has_previous %}
-      <a id="room-team-previous" data-page="{{teamRoomsPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+      <a id="room-team-previous" data-page="{{teamRoomsPage.previous_page_number}}" data-param="teamRoomsPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
       {% endif %}
       {% if teamRoomsPage.has_next %}
-      <a id="room-team-next" data-page="{{teamRoomsPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+      <a id="room-team-next" data-page="{{teamRoomsPage.next_page_number}}" data-param="teamRoomsPage" class="btn next-previous btn-primary pagination-button">Next</a>
       {% endif %} 
       
     </div>      
@@ -78,10 +78,10 @@
           
   </table>       
   {% if historyPage.has_previous %}
-  <a id="history-previous" data-page="{{historyPage.previous_page_number}}" class="btn next-previous btn-secondary pagination-button">Previous</a>
+  <a id="history-previous" data-page="{{historyPage.previous_page_number}}" data-param="historyPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
   {% endif %}
   {% if historyPage.has_next %}
-  <a id="history-next" data-page="{{historyPage.next_page_number}}" class="btn next-previous btn-primary pagination-button">Next</a>
+  <a id="history-next" data-page="{{historyPage.next_page_number}}" data-param="historyPage" class="btn next-previous btn-primary pagination-button">Next</a>
   {% endif %} 
   
 </div> 
