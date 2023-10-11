@@ -40,7 +40,7 @@ window.onload = (event) => {
       values.push(checkboxValue);
     }
   
-    var dropdownValue = "Tildel hold";
+    var dropdownValue = ",";
     if (values.length > 0) {
       dropdownValue = values.join(', ');
     }

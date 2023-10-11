@@ -1,0 +1,88 @@
+{% extends "webadmin/layout.html" %} {% block body%} {% load static %}
+
+<link rel="stylesheet" href="{% static 'multiselect.css' %}" />
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+<script src="{% static 'multiselect.js' %}"></script>
+<script src="{% static 'pagination.js' %}"></script>
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-xl-6 col-12 mb-3 mb-xl-0 mt-xl-0">
+      <form class="form shadow" action="users" method="POST">
+        <div>
+          <h2>Opret hold</h2>
+          {% csrf_token %}
+
+          <input required name="name" class="form__select" placeholder="Navn" />                  
+               
+          <div id="myMultiselect" class="multiselect mb-3">
+            <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
+              <select required name="teams" class="form-select">
+                <option></option>
+              </select>
+              <div class="overSelect"></div>
+            </div>
+            <div id="mySelectOptions">
+              <label for="1"><input type="checkbox" id="1" onchange="checkboxStatusChange()" value="Team 1" /> Team 1</label>   
+              <label for="2"><input type="checkbox" id="2" onchange="checkboxStatusChange()" value="Team 2" /> Team 2</label>   
+              <label for="3"><input type="checkbox" id="3" onchange="checkboxStatusChange()" value="Team 3" /> Team 3</label>   
+              <label for="4"><input type="checkbox" id="4" onchange="checkboxStatusChange()" value="Team 4" /> Team 4</label>   
+              <label for="5"><input type="checkbox" id="5" onchange="checkboxStatusChange()" value="Team 5" /> Team 5</label>   
+              <label for="6"><input type="checkbox" id="6" onchange="checkboxStatusChange()" value="Team 6" /> Team 6</label>     
+            </div>
+          </div>
+          <input class="btn btn-primary form_button" type="submit" value="Save" />
+       
+        </div>
+        
+      </form>
+    </div>
+  
+    <div class="col-xl-6 col-12">   
+
+      <div class="table shadow h-100 d-flex" style="flex-direction: column;">
+        <h2>Hold</h2>
+
+            <table style="width:100%">
+          <tr>
+            <th>ID</th>
+            <th>Navn</th>     
+          </tr>
+          {% for item in teamsPage.object_list  %}           
+          <tr> 
+            <td>{{item.id}}</td>
+            <td>{{item.name}}</td>         
+            <td><a href="/team/{{item.id}}">Profil</a></td>
+          </tr> 
+          {% endfor %}  
+          
+         
+                
+        </table>   
+        
+       <div class="h-100 d-flex flex-column justify-content-end">
+            <div>
+              {% if teamsPage.has_previous %}
+              <a id="teams-previous" data-page="{{teamsPage.previous_page_number}}" data-param="teamsPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
+              {% endif %}
+              {% if teamsPage.has_next %}
+              <a id="teams-next" data-page="{{teamsPage.next_page_number}}" data-param="teamsPage" class="btn next-previous btn-primary pagination-button">Next</a>
+              {% endif %} 
+            </div>         
+        </div>
+  
+        
+      </div>
+    </div>
+  </div>
+  <!-- Bruger oversigt-->
+  <!-- Historik -->
+
+    
+
+ 
+</div>
+
+
+{% endblock %}

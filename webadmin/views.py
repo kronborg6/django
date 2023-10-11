@@ -10,7 +10,6 @@ import json
 import hashlib
 import requests
 
-
 class Timeperiod(forms.Form):
     start = forms.DateField(label="Start", required=True)
     end = forms.DateField(label="End", required=True, )
@@ -18,8 +17,11 @@ class Timeperiod(forms.Form):
 class NewUser(forms.Form):
     name = forms.CharField(label="password", required=True, widget=forms.TextInput(attrs={'placeholder': 'Beskrivelser'}))
     email = forms.CharField(label="password", required=True, widget=forms.TextInput(attrs={'placeholder': 'Beskrivelser'}))
-    password = forms.CharField(label="password", required=True, widget=forms.TextInput(attrs={'placeholder': 'Beskrivelser'}))
     teams = forms.CharField(label="password", required=True, widget=forms.TextInput(attrs={'placeholder': 'Beskrivelser'}))
+
+
+class DeleteUser(forms.Form):
+     id = forms.CharField(label="id", required=True, widget=forms.TextInput(attrs={'placeholder': 'Beskrivelser'}))
 
 class User:
         def __init__(self, id,name, email,CreatedAt):
@@ -55,19 +57,37 @@ def NewPaginator(request,list, itemsPerPage, param):
 
     return page
 
-
 time = datetime.now().strftime('%H:%M')  
 
+api_url = "https://api.seaofkeys.com"
 
 
+def usersAmount(itemList):
+     
+    for i, item in enumerate(itemList):
+        itemList[i]["totalUsers"] = len(item["users"])
+
+    return itemList
+
+
+def GetAPI(endpoint):
+
+    x = requests.get(api_url + endpoint)
+    return x    
+
+def PostAPI(endpoint, obj):
+    x = requests.post(api_url + endpoint,json=obj)
+    return x
 
 def index (request):
     
     if request.session.get("token") == None:            
-            return redirect("/login")    
+            return redirect("/login")   
 
-    usersTotal = 10
-    roomsTotal = 33
+
+    usersTotal = GetAPI("/stats/users").json()["user_count"]
+    roomsTotal = GetAPI("/stats/rooms").json()["user_count"]
+    teamsTotal = GetAPI("/stats/teams").json()["user_count"]
 
     class Users:
         def __init__(self,usersX,usersY):
@@ -79,63 +99,151 @@ def index (request):
 
     users = Users(usersX,usersY)
 
-
     return render(request, "webadmin/index.html",{    
         "usersTotal" : usersTotal,
         "roomsTotal" : roomsTotal,
-        "users" : users,     
-        
+        "teamsTotal" : teamsTotal,
+        "users" : users, 
           
     })
 
-def users (request):     
+def GetTeams(result):
+     
+    teams = list()      
+
+    for item in result:
+        instance = {"id" : item["id"], "name" : item["name"]}
+        teams.append(instance)  
+
+    return teams
+
+def GetUsers(result):
+     
+    users = list()      
+
+    for item in result:
+        instance = {"id" : item["id"], "name" : item["name"]}
+        users.append(instance)  
+
+    return users
+
+
+def SplitIds(itemList):
+     
+    allTeams = itemList.split(",")
+    result = list()       
+
+    for item in allTeams:
+        if(item != ""):
+
+            result.append({"id" : int(item)})
+
+    return result
+
+
+
+def SplitIdsNoId(itemList):
+     
+    allTeams = itemList.split(",")
+    result = list()       
+
+    for item in allTeams:
+        if(item != ""):
+
+            result.append(int(item))
+
+    return result
+
+
+
+def users (request):    
 
     if request.session.get("token") == None:            
             return redirect("/login")   
 
-    userHistory = []
-    usersList = []
+    json_response = GetAPI("/user").json()
+    user_page = NewPaginator(request,json_response,5,"userPage")
 
-    time = datetime.now().strftime('%H:%M')  
-
-
-    for x in range(100):
-        usersList.append(User(x,"Morten","bindzus@mail.dk",time))
-        userHistory.append(historyInstance("Kronborg","Mødelokale 1",x, time))   
-
-    user_page = NewPaginator(request,usersList,5,"userPage")
-    history_page = NewPaginator(request,userHistory,9,"historyPage")
-    
+    result = GetAPI("/team").json()["team"]
+    teams = GetTeams(result)
+ 
     if request.method == "POST":
 
-        #HHis man har sat en dato
-        timeperiodForm = Timeperiod(request.POST)
+        #Hvis man har sat en dato
+        # timeperiodForm = Timeperiod(request.POST)
         newUser = NewUser(request.POST)
 
         if newUser.is_valid():
 
             name = newUser.cleaned_data["name"]
             email = newUser.cleaned_data["email"]
-            password = newUser.cleaned_data["password"]
-            teams = newUser.cleaned_data["teams"]
-            print(teams)
+            selectedTeams = newUser.cleaned_data["teams"] 
+            # password = newUser.cleaned_data["password"]
+            # code = newUser.cleaned_data["code"]           
 
+            teamsFormatted = SplitIds(selectedTeams)        
 
-        if timeperiodForm.is_valid():
+            url = "https://api.seaofkeys.com/user"
+            myobj = {"name" : name, 'email': email, "teams" : teamsFormatted}           
+            x = requests.post(url, json=myobj)
+            json_response = x.json()
 
-            start = timeperiodForm.cleaned_data["start"]
-            end = timeperiodForm.cleaned_data["end"]
+            return HttpResponseRedirect(reverse("users"))    
+
+        # if timeperiodForm.is_valid():
+
+        #     start = timeperiodForm.cleaned_data["start"]
+        #     end = timeperiodForm.cleaned_data["end"]
 
    
     return render(request, "webadmin/users.html",{  
-
-
-        "history" : userHistory,
-        "users" : usersList,
+             
         "userPage" : user_page,
-        "historyPage" : history_page
+        "teams" : teams
         
     })
+
+def deleteMultiple(request,endpoint):  
+
+    if request.method == "POST":         
+
+        id = request.POST["id"]
+        id = id.split(",")
+
+        ids = list()
+
+        for item in id:
+             
+             if item != "":
+                  
+                  ids.append({ "id": int(item) })       
+        
+        url = api_url + endpoint          
+        x = requests.delete(url, json=ids)       
+
+def deleteuser(request):
+        
+    deleteMultiple(request,"/user/del/")
+    return HttpResponseRedirect(reverse("users"))
+
+def edituser(request):
+     
+    if request.method == "POST":          
+
+        id = request.POST["id"]
+        name = request.POST["name"]
+        email = request.POST["email"]
+        password = request.POST["password"]
+        code = request.POST["code"]
+
+        url = "https://api.seaofkeys.com/user"
+        myobj = {"id" : int(id), "name" : name, 'email': email, "password": password, "code" : code} 
+    
+        x = requests.put(url, json=myobj)
+        json_response = x.json()   
+
+    return HttpResponseRedirect(reverse("users"))    
+          
 
 def user(request,id):
 
@@ -170,24 +278,52 @@ def user(request,id):
 def rooms (request):
 
     if request.session.get("token") == None:            
-            return redirect("/login")   
+            return redirect("/login")
 
+    if request.method == "POST":         
 
-    rooms = []
+        print(request.POST["teams"])
 
-    time = datetime.now().strftime("%H:%M %D")
-    for x in range(27):   
-        rooms.append(Room(x,"Mødelokale 1", time))
+        obj = {"name" : request.POST["name"]}
+        PostAPI("/room", obj)  
 
+    rooms = GetAPI("/room").json()["room"]
+
+    result = GetAPI("/team").json()["team"]
+    teams = GetTeams(result)
+
+    print(teams)
     
     roomsPage = NewPaginator(request,rooms,5,"roomsPage")
-
+    
 
     return render(request, "webadmin/rooms.html",{
 
-        "roomsPage" : roomsPage
+        "roomsPage" : roomsPage,
+        "teams" : teams,
 
     })
+
+
+def deleteroom(request):        
+
+    deleteMultiple(request,"/room/del/many")
+    return HttpResponseRedirect(reverse("rooms"))
+
+def editroom(request):     
+
+    if request.method == "POST":          
+
+        id = request.POST["id"]
+        name = request.POST["name"]       
+
+        url = "https://api.seaofkeys.com/room"
+        myobj = {"id" : int(id), "name" : name} 
+    
+        x = requests.put(url, json=myobj)
+        json_response = x.json()   
+
+    return HttpResponseRedirect(reverse("rooms"))     
 
 def room(request,id):
 
@@ -216,25 +352,111 @@ def room(request,id):
         "historyPage" : historyPage
     })
 
+
+
 def teams(request):
 
     if request.session.get("token") == None:            
             return redirect("/login")   
+    
+  
 
+    users = GetAPI("/user").json()
 
-
-    teams = []
-
-    for x in range(33):
-        teams.append(Team(x,"Køkkendamerne"))
-
+    teams = GetAPI("/team").json()["team"]  
     teamsPage = NewPaginator(request,teams,6,"teamsPage")
+
+    teamsPage = usersAmount(teamsPage)    
+    users = GetUsers(users)
+
+    if request.method == "POST":
+         
+        name = request.POST["name"]   
+        newUsers = request.POST["users"].split(",")  
+        
+        userObj = list()       
+        
+        for item in newUsers:
+
+            if(item != ""):
+            
+                userObj.append({"id" : int(item)})                
+        
+        obj = {"name" : name, "users" : userObj}            
+                
+        PostAPI("/team",obj).status_code       
+
+        return HttpResponseRedirect(reverse("teams"))    
+        
 
     return render(request, "webadmin/teams.html",{
 
-        "teamsPage" : teamsPage
+        "teamsPage" : teamsPage,
+        "users": users,
 
     })
+
+
+
+
+def teamsaddusers(request):
+
+    if request.method == "POST":
+
+        id = request.POST["id"]        
+        ids = request.POST["ids"]
+        ids = SplitIdsNoId(ids)
+        obj = {"team_id" : int(id), "users" : ids}      
+
+        print(obj)  
+
+        url = api_url + "/team/add"
+
+        x = requests.post(url,json=obj)
+
+        print(x.status_code)
+
+    return HttpResponseRedirect(reverse("teams"))  
+    
+
+def teamsdeleteusers(request):
+
+    if request.method == "POST":
+
+        id = request.POST["id"]        
+        ids = request.POST["ids"]             
+        ids = SplitIdsNoId(ids)     
+
+        obj = {"team_id" : int(id), "users" : ids}      
+
+        url = api_url + "/team/remove"
+
+        x = requests.delete(url,json=obj)
+
+        print(x.status_code)
+
+    return HttpResponseRedirect(reverse("teams"))  
+    
+
+def deleteteam(request):
+     
+    deleteMultiple(request,"/team/del")  
+    return HttpResponseRedirect(reverse("teams"))   
+
+def editteam(request):   
+     
+    if request.method == "POST":          
+
+        id = request.POST["id"]
+        name = request.POST["name"] 
+        url = api_url + "/team"
+       
+        myobj = {"id" : int(id), "name" : name}                
+    
+        x = requests.put(url, json=myobj)
+        json_response = x.json()   
+    
+    return HttpResponseRedirect(reverse("teams"))     
 
 def team(request,id):
 
@@ -255,8 +477,7 @@ def team(request,id):
 
         "teamUsersPage" : teamUsersPage,
         "team" : team,
-        "users" : users,
-       
+        "users" : users,       
 
     })
 

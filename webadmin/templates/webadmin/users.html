@@ -1,137 +1,298 @@
 {% extends "webadmin/layout.html" %} {% block body%} {% load static %}
-
-<link rel="stylesheet" href="{% static 'multiselect.css' %}" />
-<link rel="stylesheet" href="{% static 'style.css' %}" />
-<script src="{% static 'multiselect.js' %}"></script>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Bootstrap CRUD Data Table for Database with Modal Form</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="{% static 'pagination.js' %}"></script>
 
-
-<div class="container">
-  <div class="row">
-    <div class="col-xl-6 col-12">
-      <form class="form shadow" action="users" method="POST">
-        <div class="create">
-          <h2>Opret bruger</h2>
-          {% csrf_token %}
-
-          <input required name="name" class="form__select" placeholder="Navn" />
-          <input required name="email" class="form__select" placeholder="Email" />
-          <input required name="password" class="form__select" placeholder="Password" />               
-               
-          <div id="myMultiselect" class="multiselect mb-3">
-            <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
-              <select required name="teams" class="form-select">
-                <option></option>
-              </select>
-              <div class="overSelect"></div>
-            </div>
-            <div id="mySelectOptions">
-              <label for="1"><input type="checkbox" id="1" onchange="checkboxStatusChange()" value="Team 1" /> Team 1</label>   
-              <label for="2"><input type="checkbox" id="2" onchange="checkboxStatusChange()" value="Team 2" /> Team 2</label>   
-              <label for="3"><input type="checkbox" id="3" onchange="checkboxStatusChange()" value="Team 3" /> Team 3</label>   
-              <label for="4"><input type="checkbox" id="4" onchange="checkboxStatusChange()" value="Team 4" /> Team 4</label>   
-              <label for="5"><input type="checkbox" id="5" onchange="checkboxStatusChange()" value="Team 5" /> Team 5</label>   
-              <label for="6"><input type="checkbox" id="6" onchange="checkboxStatusChange()" value="Team 6" /> Team 6</label>     
-            </div>
-          </div>
-        
-          <input class="btn btn-primary form_button" type="submit" value="Save" />
-        </div>
-       
-      </form>
-    </div>
-  <!-- Bruger oversigt-->
-  <!-- Historik -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+<script src="{% static 'multiselect.js' %}"></script>
+<script src="{% static 'user.js' %}"></script>
+<script src="{% static 'multidelete.js' %}"></script>
+<script src="{% static 'AddNoneExisting.js' %}"></script>
+<script src="{% static 'DeleteExisting.js' %}"></script>
 
 
-    <div class="col-xl-6 col-12 mt-3 mt-xl-0">   
-
-      <div class="table shadow h-100 d-flex flex-column">
-        <h2>Brugere</h2>
-
-            <table style="width:100%">
-          <tr>
-            <th>ID</th>
-            <th>Navn</th>
-            <th>Email</th>
-            <th>Created At</th>
-          </tr>
-          {% for item in userPage.object_list  %}           
-          <tr> 
-            <td>{{item.id}}</td>
-            <td>{{item.name}}</td>
-            <td>{{item.email}}</td>
-            <td>{{item.CreatedAt}}</td>    
-            <td><a href="/user/{{item.id}}">Profil</a></td>
-          </tr> 
-          {% endfor %}  
-          
-                
-        </table>   
-        
-        <div class="h-100 d-flex flex-column justify-content-end">
-          <div>
-            {% if userPage.has_previous %}
-            <a id="users-previous" data-page="{{userPage.previous_page_number}}" data-param="userPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
-            {% endif %}
-            {% if userPage.has_next %}
-            <a id="users-next" data-page="{{userPage.next_page_number}}" data-param="userPage" class="btn next-previous btn-primary pagination-button">Next</a>
-            {% endif %} 
-          </div>
-          </div>   
-      </div>
-    </div>
-
-  </div>
- 
-  <div class="row mb-5">
-    <div class="col">
-
-  <form method="post" style="justify-content: space-evenly; align-items: center;" class="d-flex flex-row mt-5 mb-4">
-    {% csrf_token %}
-    <label for="exampleFormControlInput1" class="form-label">Tidspunkt fra</label>
-    <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="start">    
-      <label for="exampleFormControlInput1" class="form-label">Til</label>
-      <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="end">
-      <div>
-        <input type="submit" class="btn btn-primary" value="Søg">
-      </div>
-  </form>     
-
-      <div class="table shadow">
-        <h2>Historik</h2>
+<info id="info" data-title="users" data-items="hold" data-deleteendpoint="/user/" data-addendpoint="/user/teams/">
 
 
-        <table style="width:100%">
-          <tr>
-            <th>Person</th>
-            <th>Dør</th>
-            <th>Tidspunkt</th>            
-          </tr>
-          {% for item in historyPage.object_list %}     
-          <tr> 
-            <td>{{item.user}}</td>
-            <td>{{item.embedded}}</td>
-            <td>{{item.timestamp}}</td>           
-          </tr> 
-          {% endfor %}            
-        </table>      
-        <div class="h-100 d-flex flex-column justify-content-end">   
-          <div>
-            {% if historyPage.has_previous %}
-            <a id="history-previous" data-page="{{historyPage.previous_page_number}}" data-param="historyPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
-            {% endif %}
-            {% if historyPage.has_next %}
-            <a id="history-next" data-page="{{historyPage.next_page_number}}" data-param="historyPage" class="btn next-previous btn-primary pagination-button">Next</a>
-            {% endif %}
-          </div>          
-      </div> 
-      </div>
-    </div>
-  </div>
+<input class="multiedit" style="display: none;" type="checkbox" id="multiTemplateInputEdit" name="checkbox" id="checkbox_id" value="value">
+<label style="display: none;" id="multiTemplateLabelEdit" for="checkbox_id">Test</label>	
 
- 
+
+
+</info>
+
+<div class="container-xl">
+	<div class="table-responsive">
+		<div class="table-wrapper">
+			<div class="table-title d-flex">		
+				<a href="#addUserModal" class="btn btn-success mr-3" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Tilføj bruger</span></a>
+				<a href="#deleteMultipleModal" id="deleteMultiple" class="btn btn-danger m-0" data-toggle="modal"><i class="material-icons">&#xE15C;</i> <span>Slet</span></a>					
+				
+			</div>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>
+							<span class="custom-checkbox">
+								<input type="checkbox" id="selectAll">
+								<label for="selectAll"></label>
+							</span>
+						</th>
+						<th>ID</th>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Oprettet</th>
+						
+					</tr>
+				</thead>
+				<tbody>
+                    {% for item in userPage.object_list  %}
+					<tr>
+						<td>
+							<span class="custom-checkbox">
+								<input class="item-checkbox" data-id="{{item.id}}" type="checkbox" id="checkbox{{forloop.counter}}" name="options[]" value="{{forloop.counter}}">
+								<label for="checkbox1"></label>
+							</span>
+						</td>
+						<td>{{item.id}}</td>
+						<td data-id="{{item.id}}" class="user-name">{{item.name}}</td>
+						<td data-id="{{item.id}}" class="user-email">{{item.email}}</td>
+						<td>{{item.CreatedAt}}</td>					
+						<td>
+							<a data-id="{{item.id}}" href="#editUserModal" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+							<a data-id="{{item.id}}" href="#deleteUserModal" class="delete" data-toggle="modal"><i class="material-icons"  data-toggle="tooltip" title="Delete">&#xE872;</i></a>
+							<a data-id="{{item.id}}" href="#addUsersModal" class="addNone" data-toggle="modal"><i class="material-icons"  data-toggle="tooltip" title="Add users">&#xE147;</i></a>
+							<a data-id="{{item.id}}" href="#deleteUsersModal" class="deleteExisting" data-toggle="modal"><i class="material-icons"  data-toggle="tooltip" title="Delete">&#xE15C;</i></a>
+							
+						</td>
+					</tr>
+                    {% endfor %}
+				</tbody>
+			</table>
+			<div class="clearfix">
+				<div class="h-100 d-flex flex-column justify-content-end">
+					<div>
+					  {% if userPage.has_previous %}
+					  <a id="users-previous" data-page="{{userPage.previous_page_number}}" data-param="userPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
+					  {% endif %}
+					  {% if userPage.has_next %}
+					  <a id="users-next" data-page="{{userPage.next_page_number}}" data-param="userPage" class="btn next-previous btn-primary pagination-button">Next</a>
+					  {% endif %} 
+					</div>
+					</div> 
+			</div>
+		</div>
+	</div>        
 </div>
+
+
+<!-- Edit Modal HTML -->
+<div id="addUserModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="users" method="POST">
+				{% csrf_token %}
+
+				<div class="modal-header">						
+					<h4 class="modal-title">Tilføj bruger</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">						
+				
+					<div class="form-group">
+						<label>Name</label>
+						<input name="name" type="text" class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Email</label>
+						<input name="email" type="email" class="form-control" required>
+					</div>				 
+					
+					<div id="myMultiselect" class="multiselect mb-3">
+						<div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
+						  <select style="display: none;" required name="teams" class="form-select">
+							<option></option>
+						  </select>
+						  <div class="overSelect"></div>
+						</div>
+						<div id="mySelectOptions">
+
+
+							{% for item in teams %}		
+
+							<div class="d-flex">
+								<label class="m-0" for="{{item.id}}"><input type="checkbox" id="{{item.id}}" onchange="checkboxStatusChange()" value="{{item.id}}" /> {{item.name}}</label>  
+							</div>
+						
+							{% endfor %}
+
+					  
+						</div>
+					</div>
+
+
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-success" value="Tilføj">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- Edit Modal HTML -->
+<div id="editUserModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="edituser" method="post">
+
+				{% csrf_token %}
+				<div class="modal-header">						
+					<h4 class="modal-title">Rediger bruger</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">						
+					
+					<input name="id" type="hidden" id="edit-id" value="test">
+
+					<div class="form-group">
+						<label>Name</label>
+						<input name="name" type="text" id="edit-name" class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Email</label>
+						<input name="email" type="email" id="edit-mail" class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Password</label>
+						<input name="password" type="password" id="edit-password" class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Code</label>
+						<input name="code" type="text" id="edit-code" class="form-control" required>
+					</div>					
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<input type="submit" class="btn btn-info" value="Save">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- Delete Modal HTML -->
+
+<div id="deleteUserModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="deleteuser" method="POST">
+				{% csrf_token %}
+				<input name="id" id="delete-id" type="hidden">
+				<div class="modal-header">						
+					<h4 class="modal-title">Slet bruger</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">					
+					<p>Er du sikker på du vil fjerne denne bruger?</p>				
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-danger" value="Slet">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div id="deleteMultipleModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="deleteuser" method="POST">
+				{% csrf_token %}
+				<input name="id" id="delete-ids" type="hidden">
+				<div class="modal-header">						
+					<h4 class="modal-title">Slet brugere</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">					
+					<p>Er du sikker på du vil fjerne disse brugere?</p>				
+					<p id="all-delete-items"></p>
+				</div>
+				<div class="modal-footer">
+					<input id="deleteMultipleCancel" type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-danger" value="Slet">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+<div id="addUsersModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="teamsaddusers" method="POST">
+				{% csrf_token %}
+
+				<input name="id" id="add-id" type="hidden">
+				<input name="ids" id="add-ids" type="hidden">
+
+				<div class="modal-header">						
+					<h4 class="modal-title">Tilføj hold</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<div class="mb-2" id="addOptions">
+					</div>
+					<p>Er du sikker på du vil tilføje disse hold?</p>					
+				</div>				
+				<div class="modal-footer">
+					<input id="deleteMultipleCancel" type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-success" value="Tilføj">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div id="deleteUsersModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="teamsdeleteusers" method="POST">
+				{% csrf_token %}
+
+				<input name="id" id="delete-items-id" type="hidden">
+				<input name="ids" id="delete-items-ids" type="hidden">
+
+				<div class="modal-header">						
+					<h4 class="modal-title">Slet hold</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">				
+					
+					<div class="mb-2" id="deleteOptions">
+					</div>
+					<p>Er du sikker på du vil fjerne disse hold?</p>				
+				
+				</div>
+				<div class="modal-footer">
+					<input id="deleteMultipleCancel" type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-danger" value="Slet">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
 
 
 {% endblock %}

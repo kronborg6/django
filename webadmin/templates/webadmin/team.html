@@ -11,9 +11,6 @@
       <h2>ID {{team.id}} {{team.name}}</h2>
       <div>Tilmeldte: {{teamUsersPage.paginator.count}}</div>            
     </div>  
-
-
-
     
 
   <!-- Bruger oversigt-->
@@ -59,21 +56,15 @@
       <form class="form shadow p-4" action="/team/{{team.id}}" method="POST">
         <div class="d-flex flex-column" style="align-items: center;">
           <h2>Tilmeld bruger</h2>
-          {% csrf_token %}          
-
-          <input type="text" id="myInput" placeholder="Search for names.." title="Type in a name">
-          
-<ul id="myUL" class="p-0">
-
-  {% for item in users %}
-
-  <li style="display: none;"><a data-id="" >{{item.id}} {{item.name}}</a></li> 
-
-  {% endfor %}
-
-
-</ul>
-
+          {% csrf_token %}  
+          <!--Search-->
+          <input type="text" id="myInput" placeholder="Search for names.." title="Type in a name">          
+          <ul id="myUL" class="p-0">
+          {% for item in users %}
+          <li style="display: none;"><a data-id="" >{{item.id}} {{item.name}}</a></li> 
+          {% endfor %}       
+          </ul>
+          <!--Search slut-->
           <input class="btn btn-primary form_button" type="submit" value="Save" />       
         </div>        
       </form>

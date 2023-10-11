@@ -1,0 +1,83 @@
+{% extends "webadmin/layout.html" %} {% block body%} {% load static %}
+
+<link rel="stylesheet" href="{% static 'multiselect.css' %}" />
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+<script src="{% static 'multiselect.js' %}"></script>
+<script src="{% static 'pagination.js' %}"></script>
+
+
+<div class="container">
+  <div class="row" style="min-height: 500px;">
+    <div class="col-6">
+      <form class="form shadow" action="users" method="POST">
+        <div class="create">
+          <h2>Opret lokale</h2>
+          {% csrf_token %}
+
+          <input required name="name" class="form__select" placeholder="Navn" />   
+          <div id="myMultiselect" class="multiselect mb-3">
+            <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
+              <select required name="teams" class="form-select">
+                <option></option>
+              </select>
+              <div class="overSelect"></div>
+            </div>
+            <div id="mySelectOptions">
+              <label for="1"><input type="checkbox" id="1" onchange="checkboxStatusChange()" value="Team 1" /> Team 1</label>   
+              <label for="2"><input type="checkbox" id="2" onchange="checkboxStatusChange()" value="Team 2" /> Team 2</label>   
+              <label for="3"><input type="checkbox" id="3" onchange="checkboxStatusChange()" value="Team 3" /> Team 3</label>   
+              <label for="4"><input type="checkbox" id="4" onchange="checkboxStatusChange()" value="Team 4" /> Team 4</label>   
+              <label for="5"><input type="checkbox" id="5" onchange="checkboxStatusChange()" value="Team 5" /> Team 5</label>   
+              <label for="6"><input type="checkbox" id="6" onchange="checkboxStatusChange()" value="Team 6" /> Team 6</label>     
+            </div>
+          </div>
+        
+          <input class="btn btn-primary form_button" type="submit" value="Save" />
+        </div>
+      
+      </form>
+    </div> 
+
+    <div class="col-6">   
+
+      <div class="table shadow h-100 d-flex flex-column">
+        <h2>Lokaler</h2>
+
+            <table style="width:100%">
+          <tr>
+            <th>ID</th>
+            <th>Navn</th>   
+          </tr>
+          {% for item in roomsPage.object_list  %}           
+          <tr> 
+            <td>{{item.id}}</td>
+            <td>{{item.name}}</td>       
+            <td><a href="/room/{{item.id}}">Profil</a></td>
+          </tr> 
+          {% endfor %}  
+          
+                
+        </table>       
+
+        <div class="h-100 d-flex flex-column justify-content-end">
+        <div>
+          {% if roomsPage.has_previous %}
+          <a id="rooms-previous" data-page="{{roomsPage.previous_page_number}}" data-param="roomsPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
+          {% endif %}
+          {% if roomsPage.has_next %}
+          <a id="rooms-next" data-page="{{roomsPage.next_page_number}}" data-param="roomsPage" class="btn next-previous btn-primary pagination-button">Next</a>
+          {% endif %} 
+        </div>     
+        
+      </div>
+    </div>
+    
+
+
+  </div>
+
+ 
+</div>
+
+
+{% endblock %}
