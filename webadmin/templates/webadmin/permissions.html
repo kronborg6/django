@@ -1,0 +1,410 @@
+{% extends "webadmin/layout.html" %} {% block body%} {% load static %}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Bootstrap CRUD Data Table for Database with Modal Form</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="{% static 'pagination.js' %}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="{% static 'style.css' %}" />
+<!-- <script src="{% static 'multiselect.js' %}"></script> -->
+<script src="{% static 'user.js' %}"></script>
+<!-- <script src="{% static 'search.js' %}"></script> -->
+<!-- <script src="{% static 'multiadd.js' %}"></script> -->
+<script src="{% static 'EditPermission.js' %}"></script>
+<script src="{% static 'multidelete.js' %}"></script>
+<script src="{% static 'AddNoneExisting.js' %}"></script>
+<script src="{% static 'DeleteExisting.js' %}"></script>  
+<script src="{% static 'NewMultiSelect.js' %}"></script>
+  
+
+<info id="info" data-title="teams" data-items="brugere" data-deleteendpoint="/team/" data-addendpoint="/team/users/">
+
+	
+<input class="multiedit" style="display: none;" type="checkbox" id="multiTemplateInputEdit" name="checkbox" id="checkbox_id" value="value">
+<label style="display: none;" id="multiTemplateLabelEdit" for="checkbox_id">Test</label>	
+
+</info>
+<div class="container-xl">
+	<div class="table-responsive">
+		<div class="table-wrapper">
+			<div class="table-title d-flex">		
+				<a id="addItem" href="#addUserModal" class="btn btn-success mr-3" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Tilføj tilladelse</span></a>
+				<a href="#deleteMultipleModal" id="deleteMultiple" class="btn btn-danger m-0" data-toggle="modal"><i class="material-icons">&#xE15C;</i> <span>Slet</span></a>					
+			</div>
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<th>
+							<span class="custom-checkbox">
+								<input type="checkbox" id="selectAll">
+								<label for="selectAll"></label>
+							</span>
+						</th>
+						<th>ID</th>
+						<th>Lokale ID</th>
+						<th>Hold ID</th>
+						<th>Bruger ID</th>
+						<th>Start dato</th>
+						<th>Slut dato</th>
+						<th>Start tid </th>
+						<th>Slut tid</th>
+						<th>Ugedage</th>
+
+											
+					</tr>
+				</thead>
+				<tbody>
+                    {% for item in permissionsPage.object_list  %}
+					<tr>
+						<td>
+							<span class="custom-checkbox">
+								<input class="item-checkbox" data-id="{{item.id}}" type="checkbox" id="checkbox{{forloop.counter}}" name="options[]" value="{{forloop.counter}}">
+								<label for="checkbox1"></label>
+							</span>
+						</td>
+						<td>{{item.id}}</td>
+						<td>{{item.room_id}}</td>
+						<td>{{item.team_id}}</td>
+						<td>{{item.user_id}}</td>
+						<td>{{item.start_date}}</td>
+						<td>{{item.end_date}}</td>
+						<td>{{item.start_time}}</td>
+						<td>{{item.end_time}}</td>
+						<td>		
+						{% for day in item.weekdays  %}
+
+						{{day.id}}
+
+						{% endfor %}
+						</td>		
+						<td>
+							<a data-id="{{item.id}}" href="#editUserModal" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+							<a data-id="{{item.id}}" href="#deleteUserModal" class="delete" data-toggle="modal"><i class="material-icons"  data-toggle="tooltip" title="Delete">&#xE872;</i></a>												
+						</td>
+					</tr>
+                    {% endfor %}
+				</tbody>
+			</table>
+			<div class="clearfix">
+				<div class="h-100 d-flex flex-column justify-content-end">
+					<div>
+					  {% if permissionsPage.has_previous %}
+					  <a id="permissions-previous" data-page="{{permissionsPage.previous_page_number}}" data-param="permissionsPage" class="btn next-previous btn-secondary pagination-button">Previous</a>
+					  {% endif %}
+					  {% if permissionsPage.has_next %}
+					  <a id="permissions-next" data-page="{{permissionsPage.next_page_number}}" data-param="permissionsPage" class="btn next-previous btn-primary pagination-button">Next</a>
+					  {% endif %} 
+					</div>
+					</div> 
+			</div>
+		</div>
+	</div>        
+</div>
+
+
+
+<!-- Edit Modal HTML -->
+<div id="addUserModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="permissions" method="POST">
+				{% csrf_token %}
+
+				<div class="modal-header">						
+					<h4 class="modal-title">Tilføj tilladelse</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">	
+					<input id="usersToBeAdded" name="users" value="." type="hidden">		
+					<input id="roomsToBeAdded" name="rooms" value="." type="hidden">	
+					<input id="daysOfTheWeek" name="days" value="." type="hidden">	
+					<input id="teamsToBeAdded" name="teams" value="." type="hidden">
+					<div>
+						Tilladelsen gælder:
+					</div>
+					<label class="m-0" for="teamSelect"><input name="teamOrUser" type="radio" id="teamSelect" value="team" />Hold</label>
+					<label class="m-0" for="userSelect"><input name="teamOrUser" type="radio" id="userSelect" value="user" />User</label>
+					
+					
+					<div style="display:none" id="team-option">
+						
+					<div>Tilføj hold</div>
+					{% for item in teams %}								
+					<div class="d-flex">
+						<label class="m-0" for="team{{item.id}}"><input name="team-option" data-multiselect="teamsToBeAdded" class="teamsToBeAdded multiSelectItem" type="radio" id="team{{item.id}}" value="{{item.id}}" /> {{item.name}}</label>  								
+					</div>
+					{% endfor %}
+
+				</div>
+					
+				
+					<div style="display:none" id="user-option">
+
+					<div>Tilføj brugere</div>	
+						
+					{% for item in users %}								
+					<div class="d-flex">
+						<label class="m-0" for="user{{item.id}}"><input name="user-option" data-multiselect="usersToBeAdded" class="usersToBeAdded multiSelectItem" type="radio" id="user{{item.id}}" value="{{item.id}}" /> {{item.name}}</label>  								
+					</div>					
+					{% endfor %}	
+
+					</div>
+					<div>Tilføj lokaler</div>
+					{% for item in rooms %}								
+					<div class="d-flex">
+						<label class="m-0" for="room{{item.id}}"><input name="room-option" data-multiselect="roomsToBeAdded" class="roomsToBeAdded multiSelectItem" type="radio" id="room{{item.id}}" value="{{item.id}}" /> {{item.name}}</label>  								
+					</div>
+					{% endfor %}	
+					
+					
+					<!--Date-->
+					<label for="startDate" class="form-label">Tidspunkt fra</label>
+					<input style="width: 300px;" type="date" id="startDate" class="form-control" name="startDate">    
+					<label for="endDate" class="form-label">Til</label>
+					<input style="width: 300px;" type="date" id="endDate" class="form-control" name="endDate">
+
+
+					<!--Time-->
+					<label for="startTime">Start tid:</label>
+					<input type="time" id="startTime" name="startTime" min="00:00" max="23:59" required />
+					<label for="endTime">Slut tid</label>
+					<input type="time" id="endTime" name="endTime" min="00:00" max="23:59" required />
+
+					<!--Weekdays-->
+
+					<div class="d-flex">
+						<label class="m-0" for="monday"><input data-multiselect="daysOfTheWeek" class="daysOfTheWeek multiSelectItem" type="checkbox" id="monday" value="1" /> Mandag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="tuesday"><input data-multiselect="daysOfTheWeek" class="daysOfTheWeek multiSelectItem" type="checkbox" id="tuesday" value="2" /> Tirsdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="wednesday"><input data-multiselect="daysOfTheWeek" class="daysOfTheWeek multiSelectItem" type="checkbox" id="wednesday" value="3" /> Onsdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="thursday"><input data-multiselect="daysOfTheWeek" class="daysOfTheWeek multiSelectItem" type="checkbox" id="thursday" value="4" /> Torsdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="friday"><input data-multiselect="daysOfTheWeek" class="daysOfTheWeek multiSelectItem" type="checkbox" id="friday" value="5" /> Fredag</label>  								
+					</div>
+					<div class="d-flex">
+						<label class="m-0" for="saturday"><input data-multiselect="daysOfTheWeek" class="daysOfTheWeek multiSelectItem" type="checkbox" id="saturday" value="6" /> Lørdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="sunday"><input data-multiselect="daysOfTheWeek" class="daysOfTheWeek multiSelectItem" type="checkbox" id="sunday" value="7" /> Søndag</label>  								
+					</div>
+
+						
+					
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-success" value="Tilføj">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+
+
+	var teamOption = document.getElementById("team-option");
+	var userOption = document.getElementById("user-option");
+
+	var teamSelect = document.getElementById("teamSelect");
+	var userSelect = document.getElementById("userSelect");
+
+
+	var usersToBeAdded = document.getElementById("usersToBeAdded");
+	var teamsToBeAdded = document.getElementById("teamsToBeAdded")
+
+	teamSelect.addEventListener("change", function(){
+
+		usersToBeAdded.value = ".";
+		teamOption.style.display = "block";
+		userOption.style.display = "none";
+
+	})
+
+	userSelect.addEventListener("change", function (){
+		teamsToBeAdded.value = ".";
+		userOption.style.display = "block";
+		teamOption.style.display = "none";
+	})
+
+
+
+	
+	
+</script>
+
+
+
+
+<!-- Edit Modal HTML -->
+<div id="editUserModal" class="modal fade">
+
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="editpermission" method="POST">
+				{% csrf_token %}
+
+				<div class="modal-header">						
+					<h4 class="modal-title">Tilføj tilladelse</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">	
+
+					<input id="permissionToBeEdited" name="id" value="" type="hidden">
+					<input id="usersToBeEdited" name="users" value="." type="hidden">		
+					<input id="roomsToBeEdited" name="rooms" value="." type="hidden">	
+					<input id="daysOfTheWeekEdited" name="days" value="." type="hidden">	
+					<input id="teamsToBeEdited" name="teams" value="." type="hidden">						
+					
+					<div style="display:block" id="team-option">
+						
+					<div>Tilføj hold</div>
+					{% for item in teams %}								
+					<div class="d-flex">
+						<label class="m-0" for="team{{item.id}}"><input name="team-option" data-multiselect="teamsToBeEdited" class="teamsToBeEdited multiSelectItem" type="radio" id="team{{item.id}}" value="{{item.id}}" /> {{item.name}}</label>  								
+					</div>
+					{% endfor %}
+
+				</div>					
+				
+					<div style="display:block" id="user-option">
+
+					<div>Tilføj brugere</div>	
+						
+					{% for item in users %}								
+					<div class="d-flex">
+						<label class="m-0" for="user{{item.id}}"><input name="user-option" data-multiselect="usersToBeEdited" class="usersToBeEdited multiSelectItem" type="radio" id="user{{item.id}}" value="{{item.id}}" /> {{item.name}}</label>  								
+					</div>					
+					{% endfor %}	
+
+					</div>
+					<div>Tilføj lokaler</div>
+					{% for item in rooms %}								
+					<div class="d-flex">
+						<label class="m-0" for="room{{item.id}}"><input name="room-option" data-multiselect="roomsToBeEdited" class="roomsToBeEdited multiSelectItem" type="radio" id="room{{item.id}}" value="{{item.id}}" /> {{item.name}}</label>  								
+					</div>
+					{% endfor %}	
+					
+					
+					<!--Date-->
+					<label for="startDate" class="form-label">Tidspunkt fra</label>
+					<input style="width: 300px;" type="date" id="startDateEdit" class="form-control" name="startDate">    
+					<label for="endDate" class="form-label">Til</label>
+					<input style="width: 300px;" type="date" id="endDateEdit" class="form-control" name="endDate">
+
+
+					<!--Time-->
+					<label for="startTime">Start tid:</label>
+					<input type="time" id="startTimeEdit" name="startTime" min="00:00" max="23:59" required />
+					<label for="endTime">Slut tid</label>
+					<input type="time" id="endTimeEdit" name="endTime" min="00:00" max="23:59" required />
+
+					<!--Weekdays-->
+
+					<div class="d-flex">
+						<label class="m-0" for="mondayEdit"><input data-multiselect="daysOfTheWeekEdited" class="daysOfTheWeekEdited multiSelectItem" type="checkbox" id="mondayEdit" value="1" /> Mandag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="tuesdayEdit"><input data-multiselect="daysOfTheWeekEdited" class="daysOfTheWeekEdited multiSelectItem" type="checkbox" id="tuesdayEdit" value="2" /> Tirsdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="wednesdayEdit"><input data-multiselect="daysOfTheWeekEdited" class="daysOfTheWeekEdited multiSelectItem" type="checkbox" id="wednesdayEdit" value="3" /> Onsdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="thursdayEdit"><input data-multiselect="daysOfTheWeekEdited" class="daysOfTheWeekEdited multiSelectItem" type="checkbox" id="thursdayEdit" value="4" /> Torsdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="fridayEdit"><input data-multiselect="daysOfTheWeekEdited" class="daysOfTheWeekEdited multiSelectItem" type="checkbox" id="fridayEdit" value="5" /> Fredag</label>  								
+					</div>
+					<div class="d-flex">
+						<label class="m-0" for="saturdayEdit"><input data-multiselect="daysOfTheWeekEdited" class="daysOfTheWeekEdited multiSelectItem" type="checkbox" id="saturdayEdit" value="6" /> Lørdag</label>  								
+					</div>
+
+					<div class="d-flex">
+						<label class="m-0" for="sundayEdit"><input data-multiselect="daysOfTheWeekEdited" class="daysOfTheWeekEdited multiSelectItem" type="checkbox" id="sundayEdit" value="7" /> Søndag</label>  								
+					</div>
+
+						
+					
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-success" value="Tilføj">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- Delete Modal HTML -->
+
+<div id="deleteUserModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="deletepermission" method="POST">
+				{% csrf_token %}
+				<input name="id" id="delete-id" type="hidden">
+				<div class="modal-header">						
+					<h4 class="modal-title">Slet tilladelse</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">					
+					<p>Er du sikker på du vil fjerne denne tilladelse?</p>				
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-danger" value="Slet">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div id="deleteMultipleModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="deletepermission" method="POST">
+				{% csrf_token %}
+				<input name="id" id="delete-ids" type="hidden">
+				<div class="modal-header">						
+					<h4 class="modal-title">Slet tilladelser</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">					
+					<p>Er du sikker på du vil fjerne disse tilladelser?</p>				
+					<p id="all-delete-items"></p>
+				</div>
+				<div class="modal-footer">
+					<input id="deleteMultipleCancel" type="button" class="btn btn-default" data-dismiss="modal" value="Anuller">
+					<input type="submit" class="btn btn-danger" value="Slet">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}

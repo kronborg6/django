@@ -50,13 +50,19 @@
 
 <form method="post" style="justify-content: space-evenly; align-items: center;" class="d-flex flex-row mt-5 mb-3">
   {% csrf_token %}
+
+  
   <label for="exampleFormControlInput1" class="form-label">Tidspunkt fra</label>
   <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="start">    
     <label for="exampleFormControlInput1" class="form-label">Til</label>
     <input style="width: 300px;" type="date" class="form-control" id="exampleFormControlInput1" name="end">
+
+
     <div>
       <input type="submit" class="btn btn-primary" value="Søg">
     </div>
+
+
 </form>   
 
 

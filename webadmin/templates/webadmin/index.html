@@ -2,6 +2,12 @@
 <link rel="stylesheet" href="{% static 'style.css' %}" />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<script>
+    <!-- const session_cookies = JSON.parse('{{ session_cookies|escapejs|safe }}'); -->
+    <!-- console.log(session_cookies) -->
+    <!-- const sessionID = session_cookies.session_id; --> 
+</script>
+<script src="{% static 'testapi.js' %}"></script>
 
 
 <h1>{{token}}</h1>
@@ -108,7 +114,14 @@
   
 
 </div>
-
+<script>
+    <!-- var theme="{{request.session.token}}" -->
+    <!-- console.log(theme) -->
+    <!-- var theme2="{{ session_cookies|escapejs }}" -->
+    <!-- console.log(theme2) -->
+    <!-- const session_cookies = JSON.parse('{{ session_cookies|escapejs }}'); -->
+    // Now you can access session_cookies in your JavaScript code.
+</script>
 <script>
 
 var xValues = [];
@@ -116,9 +129,9 @@ var yValues = [];
 
 </script>
 
-
 {% for item in users.usersX %}
 <script>
+<!-- const sessionID = "{{ request.session.session_id }}"; -->
 xValues.push("{{item}}");
 </script>
 {% endfor %}
@@ -127,12 +140,14 @@ xValues.push("{{item}}");
 {% for x in users.usersY %}
 <script>
 
+<!-- const sessionID = "{{ request.session.session_id }}"; -->
 yValues.push("{{x}}")
 </script>
 {% endfor %}
 
 <script>
 
+<!-- const sessionID = "{{ request.session.session_id }}"; -->
     var barColors = "#FFB547";
     var chart = new Chart("myChart", {
       type: "bar",
@@ -190,6 +205,7 @@ var teamsButton = document.getElementsByClassName("info-teams")[0];
 
 
 
+<!-- const sessionID = JSON.parse('{{ session_cookies|escapejs }}'); -->
 usersButton.addEventListener("click", function(){
     updateY(yValues,"#FFB547")
 })
@@ -200,6 +216,7 @@ roomsButton.addEventListener("click", function(){
 eventsButton.addEventListener("click", function(){
     updateY(eventsYValues,"#6DFF8D")
 })
+
 teamsButton.addEventListener("click", function(){
     updateY(teamsYValues,"#FF7373")
 })
