@@ -35,7 +35,6 @@ class Paginator {
             paginator.SetButtons();        
 
         })
-
     }
 
     var paginators = document.querySelectorAll(".pagination-button");

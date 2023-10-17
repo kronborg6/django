@@ -1,18 +1,14 @@
 from django.shortcuts import render
 
-from django.shortcuts import render, reverse, HttpResponseRedirect, redirect
+from django.shortcuts import redirect
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django import forms
 from datetime import datetime, timedelta
 import json
 import hashlib
 import requests
-
-class Timeperiod(forms.Form):
-    start = forms.DateField(label="Start", required=True)
-    end = forms.DateField(label="End", required=True, )
 
 class NewUser(forms.Form):
     name = forms.CharField(label="password", required=True, widget=forms.TextInput(attrs={'placeholder': 'Beskrivelser'}))
@@ -29,8 +25,6 @@ class NewPermission(forms.Form):
     startTime = forms.CharField()
     endTime = forms.CharField()
 
-class DeleteUser(forms.Form):
-     id = forms.CharField(label="id", required=True, widget=forms.TextInput(attrs={'placeholder': 'Beskrivelser'}))
 
 class User:
         def __init__(self, id,name, email,CreatedAt):
@@ -43,14 +37,6 @@ class Team:
         def __init__(self,id,name):
             self.id = id
             self.name = name
-
-class historyInstance:
-    def __init__(self, user, embedded, id, timestamp):
-        self.user = user
-        self.embedded = embedded
-        self.id = id
-        self.timestamp = timestamp
-
 
 class Room:
         def __init__(self,id,name, timestamp):
@@ -86,8 +72,11 @@ def GetAPI(endpoint, request):
         x = requests.get(api_url + endpoint, cookies=session_cookies)
         return x    
 
-def PostAPI(endpoint, obj):
-    x = requests.post(api_url + endpoint,json=obj)
+def PostAPI(endpoint, obj,request):
+
+    session_cookies = request.session.get('token')  
+
+    x = requests.post(api_url + endpoint,json=obj, cookies=session_cookies)
     return x
 
 
@@ -112,10 +101,10 @@ def index (request):
     if request.session.get("token") == None:            
             return redirect("/login")
 
-    # usersTotal = GetAPI("/stats/users",request).json()["user_count"]
-    # roomsTotal = GetAPI("/stats/rooms",request).json()["user_count"]
-    # teamsTotal = GetAPI("/stats/teams",request).json()["user_count"]
-
+    usersTotal = GetAPI("/stats/users",request).json()["user_count"]
+    roomsTotal = GetAPI("/stats/rooms",request).json()["user_count"]
+    teamsTotal = GetAPI("/stats/teams",request).json()["user_count"]
+    
     class Users:
         def __init__(self,usersX,usersY):
             self.usersX = usersX
@@ -123,23 +112,13 @@ def index (request):
 
     usersX = ["24-09-2023", "25-09-2023","26-09-2023", "27-09-2023", "28-09-2023","29-09-2023","30-09-2023"]
     usersY = ["20","21","24","30","32","35","40"]   
-
     users = Users(usersX,usersY)
-    # session_cookies_json = json.dumps(request.session.get("bear"))
-    # print(session_cookies_json)
-    # print(session_cookies_json)
-    # print(session_cookies_json)
-    # print(session_cookies_json)
-    # print(request.session.get("bear"))
-    # print(request.session.get("bear"))
-    # print(request.session.get("bear"))
-    # print(request.session.get("bear"))
+
     return render(request, "webadmin/index.html",{    
-        # "usersTotal" : usersTotal,
-        # "roomsTotal" : roomsTotal,
-        # "teamsTotal" : teamsTotal,
+        "usersTotal" : usersTotal,
+        "roomsTotal" : roomsTotal,
+        "teamsTotal" : teamsTotal,
         "users" : users, 
-        "session_cookies": "dfkgldfjgd",
           
     })
 
@@ -191,42 +170,12 @@ def SplitIdsNoId(itemList):
 def users (request):    
 
     if request.session.get("token") == None:            
-            return redirect("/login")   
+            return redirect("/login")      
 
     json_response = GetAPI("/user",request).json()
     user_page = NewPaginator(request,json_response,5,"userPage")
-
     result = GetAPI("/team",request).json()["team"]
-    teams = GetTeams(result)
- 
-    if request.method == "POST":
-
-        #Hvis man har sat en dato
-        # timeperiodForm = Timeperiod(request.POST)
-        newUser = NewUser(request.POST)
-
-        if newUser.is_valid():
-
-            name = newUser.cleaned_data["name"]
-            email = newUser.cleaned_data["email"]
-            selectedTeams = newUser.cleaned_data["teams"] 
-            # password = newUser.cleaned_data["password"]
-            # code = newUser.cleaned_data["code"]           
-
-            teamsFormatted = SplitIds(selectedTeams)        
-
-            url = "https://api.seaofkeys.com/user"
-            myobj = {"name" : name, 'email': email, "teams" : teamsFormatted}           
-            x = requests.post(url, json=myobj)
-            json_response = x.json()
-
-            return HttpResponseRedirect(reverse("users"))    
-
-        # if timeperiodForm.is_valid():
-
-        #     start = timeperiodForm.cleaned_data["start"]
-        #     end = timeperiodForm.cleaned_data["end"]
-
+    teams = GetTeams(result)    
    
     return render(request, "webadmin/users.html",{  
              
@@ -235,18 +184,41 @@ def users (request):
         
     })
 
+def newUser(request):
 
-def addOrDeleteTeam(add, userId, teamIds):
+    if request.method == "POST":
+              
+        newUser = NewUser(request.POST)
+
+        if newUser.is_valid():
+
+            name = newUser.cleaned_data["name"]
+            email = newUser.cleaned_data["email"]
+            selectedTeams = newUser.cleaned_data["teams"]
+            teamsFormatted = SplitIds(selectedTeams) 
+
+            session_cookies = request.session.get("token")
+
+            url = api_url + "/user"
+            myobj = {"name" : name, 'email': email, "teams" : teamsFormatted}           
+            x = requests.post(url, json=myobj, cookies=session_cookies)
+            json_response = x.json()
+
+    return HttpResponseRedirect(reverse("users"))
+
+def addOrDeleteTeam(add, userId, teamIds,request):
      
     teamsFormatted = SplitIdsNoId(teamIds)
 
     myobj = {"user_id" : int(userId), 'teams': teamsFormatted}  
 
+    session_cookies = request.session.get('token')  
+
     if add is True:
-        x = requests.post(api_url + "/team/user",json=myobj)
+        x = requests.post(api_url + "/team/user",json=myobj,cookies=session_cookies)
         
     else:
-        x = requests.delete(api_url + "/team/user",json=myobj)
+        x = requests.delete(api_url + "/team/user",json=myobj, cookies=session_cookies)
 
 def usersdeleteteam(request):
 
@@ -255,8 +227,7 @@ def usersdeleteteam(request):
         userId = request.POST["id"]
         teamIds = request.POST["ids"]
 
-        addOrDeleteTeam(False,userId,teamIds)
-
+        addOrDeleteTeam(False,userId,teamIds,request)
 
     return HttpResponseRedirect(reverse("users"))
 
@@ -274,7 +245,9 @@ def usersaddteam(request):
 
 def deleteMultiple(request,endpoint):  
 
-    if request.method == "POST":         
+    if request.method == "POST":      
+
+        session_cookies = request.session.get('token')   
 
         id = request.POST["id"]
         id = id.split(",")
@@ -288,7 +261,7 @@ def deleteMultiple(request,endpoint):
                   ids.append({ "id": int(item) })       
         
         url = api_url + endpoint          
-        x = requests.delete(url, json=ids)       
+        x = requests.delete(url, json=ids,cookies=session_cookies)       
 
 def deleteuser(request):
         
@@ -305,42 +278,15 @@ def edituser(request):
         # password = request.POST["password"]
         # code = request.POST["code"]
 
-        url = "https://api.seaofkeys.com/user"
+        session_cookies = request.session.get("token")
+
+        url = api_url + "/user"
         myobj = {"id" : int(id), "name" : name, 'email': email} 
     
-        x = requests.put(url, json=myobj)
+        x = requests.put(url, json=myobj, cookies=session_cookies)
         json_response = x.json()   
 
     return HttpResponseRedirect(reverse("users"))   
-
-# def user(request,id):
-
-#     if request.session.get("token") == None:            
-#             return redirect("/login")   
-
-#     time = datetime.now().strftime("%H:%M %D")
-#     currentUser = User(id,"Morten","bindzus@mail.dk",time) 
-#     teams = []
-
-#     userHistory = []
-
-#     for x in range(10):   
-#         userHistory.append(historyInstance("Kronborg","Mødelokale 1", x, time)) 
-
-#     for x in range(5):
-#         teams.append(Team(x,"Kantinedamerne"))
-
-#     #Pagination
-#     team_page = NewPaginator(request,teams,3,"teamPage")
-#     history_page = NewPaginator(request,userHistory,3,"userHistory")
-
-#     return render(request, "webadmin/user.html",{
-#         "user" : currentUser,
-#         "teams" : teams,
-#         "history": userHistory,
-#         "teamPage" : team_page,
-#         "historyPage" : history_page
-#     })
 
 
 def rooms (request):
@@ -353,7 +299,7 @@ def rooms (request):
         print(request.POST["teams"])
 
         obj = {"name" : request.POST["name"]}
-        PostAPI("/room", obj)  
+        PostAPI("/room", obj,request)  
 
     rooms = GetAPI("/room",request).json()["room"]
     
@@ -379,41 +325,15 @@ def editroom(request):
         id = request.POST["id"]
         name = request.POST["name"]       
 
-        url = "https://api.seaofkeys.com/room"
+        url = api_url + "/room"
         myobj = {"id" : int(id), "name" : name} 
-    
-        x = requests.put(url, json=myobj)
+
+        session_cookies = request.session.get("token")        
+
+        x = requests.put(url, json=myobj,cookies=session_cookies)
         json_response = x.json()   
 
-    return HttpResponseRedirect(reverse("rooms"))     
-
-# def room(request,id):
-
-#     if request.session.get("token") == None:            
-#             return redirect("/login")   
-
-
-#     teams = []
-#     history = []
-#     time = datetime.now().strftime("%H:%M %D")    
-#     room = Room(1,"Mødelokale",time)
-
-#     for x in range(23):
-#         teams.append(Team(x,"Kantinedamerne"))      
-#         history.append(historyInstance("Bruger","Dør 1",x,time))
-
-#     teamRoomsPage = NewPaginator(request,teams,5,"teamRoomsPage")
-#     historyPage = NewPaginator(request,history,5,"historyPage")
-
-
-#     return render(request, "webadmin/room.html",{
-
-#         "room" : room,
-#         "teams" : teams,
-#         "teamRoomsPage" : teamRoomsPage,
-#         "historyPage" : historyPage
-#     })
-
+    return HttpResponseRedirect(reverse("rooms")) 
 
 
 def teams(request):
@@ -445,7 +365,7 @@ def teams(request):
         
         obj = {"name" : name, "users" : userObj}            
                 
-        PostAPI("/team",obj).status_code       
+        PostAPI("/team",obj,request).status_code       
 
         return HttpResponseRedirect(reverse("teams"))    
         
@@ -466,11 +386,15 @@ def teamsaddusers(request):
         ids = SplitIdsNoId(ids)
         obj = {"team_id" : int(id), "users" : ids}      
 
+
+        session_cookies = request.session.get("token")
+        
+
         print(obj)  
 
         url = api_url + "/team/add"
 
-        x = requests.post(url,json=obj)
+        x = requests.post(url,json=obj,cookies=session_cookies)
 
         print(x.status_code)
 
@@ -481,6 +405,8 @@ def teamsdeleteusers(request):
 
     if request.method == "POST":
 
+        session_cookies = request.session.get('token')       
+
         id = request.POST["id"]        
         ids = request.POST["ids"]             
         ids = SplitIdsNoId(ids)     
@@ -489,7 +415,7 @@ def teamsdeleteusers(request):
 
         url = api_url + "/team/remove"
 
-        x = requests.delete(url,json=obj)
+        x = requests.delete(url,json=obj,cookies=session_cookies)
 
         print(x.status_code)
 
@@ -509,38 +435,14 @@ def editteam(request):
         name = request.POST["name"] 
         url = api_url + "/team"
        
-        myobj = {"id" : int(id), "name" : name}                
+        myobj = {"id" : int(id), "name" : name}          
+
+        session_cookies = request.session.get("token")      
     
-        x = requests.put(url, json=myobj)
+        x = requests.put(url, json=myobj,cookies=session_cookies)
         json_response = x.json()   
     
-    return HttpResponseRedirect(reverse("teams"))     
-
-# def team(request,id):
-
-#     if request.session.get("token") == None:            
-#             return redirect("/login")   
-
-#     users = []
-#     team = Team(1,"Køkkendamerne")
-
-
-#     for x in range(25):
-
-#         users.append(User(x,"Morten","morten@mail.dk",time))
-
-#     teamUsersPage = NewPaginator(request,users,5,"teamUsersPage")
-
-#     return render(request, "webadmin/team.html",{
-
-#         "teamUsersPage" : teamUsersPage,
-#         "team" : team,
-#         "users" : users,     
-
-#     })
-
-
-
+    return HttpResponseRedirect(reverse("teams"))
 
 def permissions(request):
 
@@ -580,11 +482,9 @@ def permissions(request):
                 "start_time": startTime,
                 "end_time": endTime,
                 "weekdays": days
-            }
+            }            
 
-            print(obj)
-
-            x = PostAPI("/permission", obj)      
+            x = PostAPI("/permission", obj,request)      
 
         return HttpResponseRedirect(reverse("permissions"))        
 
@@ -639,6 +539,8 @@ def editpermission(request):
 
             startDate = str(startDate)
             endDate = str(endDate)
+
+            session_cookies = request.session.get("token")
           
             obj = {
                 "id" : int(id),
@@ -652,104 +554,14 @@ def editpermission(request):
                 "weekdays": days
             }            
 
-            x = requests.put(api_url + "/permission/",json=obj) 
+            x = requests.put(api_url + "/permission/",json=obj,cookies=session_cookies) 
 
         return HttpResponseRedirect(reverse("permissions")) 
-# def login(request):
-#     email = ""
-#     password = ""
 
-#     if request.method == 'POST':
-#         email = request.POST['email_test']
-#         password = request.POST['password']
-#         email = "mkronborg7@gmail.com"
-#         password = "Test"
-#         url = "http://localhost:8006/auth/login"
-
-#         myobj = {'email': email, "password": password}
-#         x = requests.post(url, json=myobj)
-
-#         if x.status_code == 200:
-#             token = x.json()["token"]
-#             session_cookies = dict(x.cookies)
-#             request.session['token'] = session_cookies
-#             set_cookie(x.cookies)
-#             return HttpResponseRedirect(reverse("index")) 
-
-
-
-#     return render(request, "webadmin/login.html", {
-#         "email": email,
-#         "password": password
-#     })
-def logout(request):
-
-    session_cookies = request.session['token']
-    x = requests.get(api_url + "/auth/logout",cookies=session_cookies)
-    request.session['token'] = None
-
-    return HttpResponseRedirect(reverse("login"))
-# def set_cookie(cook):
-
-#     session_cookies = dict(cook)
-#     response = HttpResponseRedirect(reverse("index"))
-            
-#     # Set the cookies in the response to pass to the browser
-#     for cookie_name, cookie_value in session_cookies.items():
-#         response.set_cookie(cookie_name, cookie_value)
-
-#         return response
-
-#     return HttpResponse("Login failed")
-
-
-
-
-
-
-
-# def loginsd(request):
-
-
-#     email = ""
-#     password = ""
-
-#     if request.method == 'POST':
-
-#         session = requests.Session()
-#         email = request.POST['email_test']
-#         password = request.POST['password']
-#         email = "mkronborg7@gmail.com"
-#         password = "Test"
-#         url = "http://localhost:8006/auth/login"
-
-#         myobj = {'email': email, "password": password}
-#         x = session.post(url, json=myobj)
-
-#         if x.status_code == 200:
-#             token = x.json()["token"]
-
-#             # Extract and store session cookies as a dictionary
-#             # authorization_header = x.headers.get('Authorization')
-#             # request.session['bear'] = authorization_header
-
-#             session_cookies = dict(x.cookies)
-#             request.session['token'] = session_cookies            
-#             print("Session cookies: " + str(session_cookies))
-#             print(session_cookies)
-
-#             return HttpResponseRedirect(reverse("index"))
-
-#         return HttpResponse("Login failed")
-
-#     return render(request, "webadmin/login.html", {
-#         "email": email,
-#         "password": pa, HttpResponseRedirectssword
-#     })
 def set_cookie_and_redirect(cook, redirect_url):
     session_cookies = dict(cook)
     response = HttpResponseRedirect(redirect_url)
-    
+
     for cookie_name, cookie_value in session_cookies.items():
         response.set_cookie(cookie_name, cookie_value, domain=".seaofkeys.com")
 
@@ -763,19 +575,17 @@ def login(request):
         email = request.POST['email_test']
         password = request.POST['password']
         email = "mkronborg7@gmail.com"
-        password = "Test"
-        # url = "http://localhost:8006/auth/login"
+        password = "Test"  
         url = "https://api.seaofkeys.com/auth/login"
+
+        url = api_url + "/auth/login"
 
         myobj = {'email': email, "password": password}
         x = requests.post(url, json=myobj)
 
         if x.status_code == 200:
             token = x.json()["token"]
-            session_cookies = dict(x.cookies)
-            print(x.cookies)
-            print(x.cookies)
-            print(x.cookies)
+            session_cookies = dict(x.cookies)         
             request.session['token'] = session_cookies
 
             redirect_url = reverse("index")
@@ -786,3 +596,100 @@ def login(request):
         "email": email,
         "password": password
     })
+
+
+def logout(request):
+    
+    session_cookies = request.session['token']
+    x = requests.get(api_url + "/auth/logout",cookies=session_cookies)
+    request.session['token'] = None    
+    
+    return HttpResponseRedirect(reverse("login"))
+
+def test_example(request):
+
+    return HttpResponseRedirect(reverse("index"))
+
+# def team(request,id):
+
+#     if request.session.get("token") == None:            
+#             return redirect("/login")   
+
+#     users = []
+#     team = Team(1,"Køkkendamerne")
+
+
+#     for x in range(25):
+
+#         users.append(User(x,"Morten","morten@mail.dk",time))
+
+#     teamUsersPage = NewPaginator(request,users,5,"teamUsersPage")
+
+#     return render(request, "webadmin/team.html",{
+
+#         "teamUsersPage" : teamUsersPage,
+#         "team" : team,
+#         "users" : users,     
+
+#     })
+
+
+
+
+# def user(request,id):
+
+#     if request.session.get("token") == None:            
+#             return redirect("/login")   
+
+#     time = datetime.now().strftime("%H:%M %D")
+#     currentUser = User(id,"Morten","bindzus@mail.dk",time) 
+#     teams = []
+
+#     userHistory = []
+
+#     for x in range(10):   
+#         userHistory.append(historyInstance("Kronborg","Mødelokale 1", x, time)) 
+
+#     for x in range(5):
+#         teams.append(Team(x,"Kantinedamerne"))
+
+#     #Pagination
+#     team_page = NewPaginator(request,teams,3,"teamPage")
+#     history_page = NewPaginator(request,userHistory,3,"userHistory")
+
+#     return render(request, "webadmin/user.html",{
+#         "user" : currentUser,
+#         "teams" : teams,
+#         "history": userHistory,
+#         "teamPage" : team_page,
+#         "historyPage" : history_page
+#     })
+
+
+
+# def room(request,id):
+
+#     if request.session.get("token") == None:            
+#             return redirect("/login")   
+
+
+#     teams = []
+#     history = []
+#     time = datetime.now().strftime("%H:%M %D")    
+#     room = Room(1,"Mødelokale",time)
+
+#     for x in range(23):
+#         teams.append(Team(x,"Kantinedamerne"))      
+#         history.append(historyInstance("Bruger","Dør 1",x,time))
+
+#     teamRoomsPage = NewPaginator(request,teams,5,"teamRoomsPage")
+#     historyPage = NewPaginator(request,history,5,"historyPage")
+
+
+#     return render(request, "webadmin/room.html",{
+
+#         "room" : room,
+#         "teams" : teams,
+#         "teamRoomsPage" : teamRoomsPage,
+#         "historyPage" : historyPage
+#     })

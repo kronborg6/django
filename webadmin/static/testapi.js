@@ -5,7 +5,7 @@ const api_url = "https://api.seaofkeys.com/stats/users";
 // Create a Headers object and add the cookies to it
 
 // const headers = new Headers();
-// headers.append("Authorization", `${session_cookies}`);
+// headers.append("Authorization", ${session_cookies});
 
 // Define the URL for the fetch request
 // const session_cookiess = "Jdfsd";
@@ -15,8 +15,8 @@ fetch(api_url, {
   method: "GET",
   credentials: "include",
   // headers: {
-  //   Authorization: `${session_cookies}`,
-  //   sessin_id: `${session_cookies}`,
+  //   Authorization: ${session_cookies},
+  //   sessin_id: ${session_cookies},
   // },
 })
   .then((response) => {

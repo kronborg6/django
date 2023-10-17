@@ -5,9 +5,10 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path("", views.index, name="index"),
-
+    
+    
     #Main pages
+    path("", views.index, name="index"),    
     path("users", views.users, name="users"),
     path("rooms", views.rooms, name="rooms"),
     path("teams",views.teams, name="teams"),
@@ -19,6 +20,7 @@ urlpatterns = [
     path("edituser", views.edituser, name="edituser"),
     path("usersdeleteteam", views.usersdeleteteam, name="usersdeleteteam"),
     path("usersaddteam", views.usersaddteam, name="usersaddteam"),
+    path("newUser", views.newUser, name="newUser"),
     #Room
     path("editroom", views.editroom, name="editroom"),    
     path("deleteroom", views.deleteroom, name="deleteroom"),  
@@ -36,7 +38,7 @@ urlpatterns = [
     path("logout", views.logout, name="logout"),
 
     #Unit test example
-    # path("test", views.test_example, name="example")
+    path("test", views.test_example, name="example")
 
     
     #Sub pages
