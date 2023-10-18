@@ -563,7 +563,7 @@ def set_cookie_and_redirect(cook, redirect_url):
     response = HttpResponseRedirect(redirect_url)
 
     for cookie_name, cookie_value in session_cookies.items():
-        response.set_cookie(cookie_name, cookie_value, domain=".seaofkeys.com")
+        response.set_cookie(cookie_name, cookie_value, max_age=3600, domain=".seaofkeys.com")
 
     return response
 
