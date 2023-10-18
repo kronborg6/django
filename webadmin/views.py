@@ -99,7 +99,7 @@ def ReplaceCommas(item):
 def index (request):
     
     if request.session.get("token") == None:            
-            return redirect("/login")
+            return redirect("/login")    
 
     usersTotal = GetAPI("/stats/users",request).json()["user_count"]
     roomsTotal = GetAPI("/stats/rooms",request).json()["user_count"]
