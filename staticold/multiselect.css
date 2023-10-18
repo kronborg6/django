@@ -1,9 +1,14 @@
-
+.multiselect {
+   
+  }
   
   .selectBox {
     position: relative;
-  }  
-
+  }
+  
+  .selectBox select {
+    
+  }
 
   .form-select{
 
