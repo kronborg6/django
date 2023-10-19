@@ -28,8 +28,8 @@
 
 </info>
 
-<div class="container-xl">
-	<div class="table-responsive">
+<div class="container-xl mt-5">
+	<div class="table-responsive shadow">
 		<div class="table-wrapper">
 			<div class="table-title d-flex">		
 				<a href="#addUserModal" class="btn btn-success mr-3" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Tilføj bruger</span></a>
@@ -124,6 +124,8 @@
 						  <div class="overSelect"></div>
 						</div>
 						<div id="mySelectOptions">
+
+							<div class="mb-2">Tilføj hold til brugeren</div>
 							{% for item in teams %}		
 							<div class="d-flex">
 								<label class="m-0" for="{{item.id}}"><input type="checkbox" id="{{item.id}}" onchange="checkboxStatusChange()" value="{{item.id}}" /> {{item.name}}</label>  

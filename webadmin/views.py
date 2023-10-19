@@ -211,8 +211,12 @@ def addOrDeleteTeam(add, userId, teamIds,request):
     teamsFormatted = SplitIdsNoId(teamIds)
 
     myobj = {"user_id" : int(userId), 'teams': teamsFormatted}  
+    
+    print(myobj)
 
     session_cookies = request.session.get('token')  
+    
+    print(session_cookies)
 
     if add is True:
         x = requests.post(api_url + "/team/user",json=myobj,cookies=session_cookies)
@@ -260,7 +264,8 @@ def deleteMultiple(request,endpoint):
                   
                   ids.append({ "id": int(item) })       
         
-        url = api_url + endpoint          
+        url = api_url + endpoint     
+        
         x = requests.delete(url, json=ids,cookies=session_cookies)       
 
 def deleteuser(request):
@@ -294,9 +299,7 @@ def rooms (request):
     if request.session.get("token") == None:            
             return redirect("/login")
 
-    if request.method == "POST":         
-
-        print(request.POST["teams"])
+    if request.method == "POST":
 
         obj = {"name" : request.POST["name"]}
         PostAPI("/room", obj,request)  
