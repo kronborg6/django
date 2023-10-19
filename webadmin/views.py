@@ -606,6 +606,9 @@ def logout(request):
     session_cookies = request.session['token']
     x = requests.get(api_url + "/auth/logout",cookies=session_cookies)
     request.session['token'] = None    
+    if 'kronborg_id' in request.COOKIES:
+        response = HttpResponse("Deleting the other cookie")
+        response.delete_cookie('kronborg_id')
     
     return HttpResponseRedirect(reverse("login"))
 
