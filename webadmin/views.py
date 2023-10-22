@@ -110,7 +110,7 @@ def index (request):
             self.usersX = usersX
             self.usersY = usersY
 
-    usersX = ["24-09-2023", "25-09-2023","26-09-2023", "27-09-2023", "28-09-2023","29-09-2023","30-09-2023"]
+    usersX = ["16-10-2023", "17-10-2023","18-10-2023", "19-10-2023", "20-10-2023","21-10-2023","22-10-2023"]
     usersY = ["20","21","24","30","32","35","40"]   
     users = Users(usersX,usersY)
 
@@ -121,6 +121,7 @@ def index (request):
         "users" : users, 
           
     })
+    
 
 def GetTeams(result):
      
@@ -145,7 +146,7 @@ def GetUsers(result):
 def SplitIds(itemList):       
 
     newList = itemList.split(",")
-    result = list()       
+    result = list()  
 
     for item in newList:
         if(item != ""):
@@ -173,7 +174,7 @@ def users (request):
             return redirect("/login")      
 
     json_response = GetAPI("/user",request).json()
-    user_page = NewPaginator(request,json_response,5,"userPage")
+    user_page = NewPaginator(request,json_response,10,"userPage")
     result = GetAPI("/team",request).json()["team"]
     teams = GetTeams(result)    
    
@@ -242,7 +243,7 @@ def usersaddteam(request):
         userId = request.POST["id"]
         teamIds = request.POST["ids"]
 
-        addOrDeleteTeam(True,userId,teamIds)
+        addOrDeleteTeam(True,userId,teamIds,request)
 
     return HttpResponseRedirect(reverse("users"))
 
@@ -510,6 +511,11 @@ def deletepermission(request):
 
 def ConvertDays(days):
 
+
+    if days == None:
+
+        return None
+
     if len(str(days)) != 1:    
                 days = SplitIds(days)
 
@@ -560,6 +566,19 @@ def editpermission(request):
             x = requests.put(api_url + "/permission/",json=obj,cookies=session_cookies) 
 
         return HttpResponseRedirect(reverse("permissions")) 
+ 
+
+def history(request):
+
+    history = GetAPI("/history",request).json()["history"]
+    history_page = NewPaginator(request,history,10,"historyPage")
+
+    return render(request, "webadmin/history.html",{
+
+        "history_page" : history_page
+
+    })
+
 
 def set_cookie_and_redirect(cook, redirect_url):
     session_cookies = dict(cook)
@@ -568,7 +587,7 @@ def set_cookie_and_redirect(cook, redirect_url):
     for cookie_name, cookie_value in session_cookies.items():
         response.set_cookie(cookie_name, cookie_value, max_age=3600, domain=".seaofkeys.com")
 
-    return response
+    return response    
 
 def login(request):
     email = ""
@@ -606,9 +625,6 @@ def logout(request):
     session_cookies = request.session['token']
     x = requests.get(api_url + "/auth/logout",cookies=session_cookies)
     request.session['token'] = None    
-    if 'kronborg_id' in request.COOKIES:
-        response = HttpResponse("Deleting the other cookie")
-        response.delete_cookie('kronborg_id')
     
     return HttpResponseRedirect(reverse("login"))
 

@@ -287,3 +287,29 @@ table.table .avatar {
 .modal form label {
 	font-weight: normal;
 }	
+
+
+
+
+@media (min-width: 200px) { 
+
+
+	.loginout{
+
+		justify-content: start;
+		
+	}
+
+ }
+
+
+@media (min-width: 992px) { 
+
+
+	.loginout{
+
+		justify-content: end;
+		
+	}
+
+ }

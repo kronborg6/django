@@ -4,8 +4,7 @@ from . import views
 from django.contrib import admin
 from django.urls import path, include
 
-urlpatterns = [
-    
+urlpatterns = [    
     
     #Main pages
     path("", views.index, name="index"),    
@@ -13,6 +12,7 @@ urlpatterns = [
     path("rooms", views.rooms, name="rooms"),
     path("teams",views.teams, name="teams"),
     path("permissions", views.permissions, name="permissions"),
+    path("history", views.history, name="history"),
 
     #API calls
     #User
