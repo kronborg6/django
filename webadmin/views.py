@@ -388,13 +388,9 @@ def teamsaddusers(request):
         id = request.POST["id"]        
         ids = request.POST["ids"]
         ids = SplitIdsNoId(ids)
-        obj = {"team_id" : int(id), "users" : ids}      
+        obj = {"team_id" : int(id), "users" : ids}
 
-
-        session_cookies = request.session.get("token")
-        
-
-        print(obj)  
+        session_cookies = request.session.get("token") 
 
         url = api_url + "/team/add"
 
@@ -592,12 +588,14 @@ def set_cookie_and_redirect(cook, redirect_url):
 def login(request):
     email = ""
     password = ""
+    
+    message = ""
 
     if request.method == 'POST':
         email = request.POST['email_test']
         password = request.POST['password']
-        email = "mkronborg7@gmail.com"
-        password = "Test"  
+        # email = "mkronborg7@gmail.com"
+        # password = "Test"  
         url = "https://api.seaofkeys.com/auth/login"
 
         url = api_url + "/auth/login"
@@ -613,10 +611,15 @@ def login(request):
             redirect_url = reverse("index")
             response = set_cookie_and_redirect(x.cookies, redirect_url)
             return response
+        else:
+            
+            message = "Forkert kode/email"
+            
+            
 
     return render(request, "webadmin/login.html", {
-        "email": email,
-        "password": password
+        "message" : message
+   
     })
 
 
